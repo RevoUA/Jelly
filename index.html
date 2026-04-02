@@ -4,7 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Jelly Lab</title>
+
+<link rel="apple-touch-icon" href="https://img.icons8.com/emoji/180/test-tube-emoji.png">
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -22,14 +26,7 @@
 
   .header{padding:20px 16px 12px;background:var(--bg);z-index:10;}
   .logo{font-size:18px;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
-  
-  /* ВИПРАВЛЕНО: Кнопка інструменти тепер має правильний колір тексту */
-  .tools-btn{
-    font-size:10px; opacity:0.8; cursor:pointer; padding:6px 12px; 
-    border:1.5px solid var(--border); border-radius:8px; font-weight:800; 
-    background:var(--card); text-transform:uppercase;
-    color:var(--text); /* Додав явний колір тексту */
-  }
+  .tools-btn{font-size:10px; opacity:0.8; cursor:pointer; padding:6px 12px; border:1.5px solid var(--border); border-radius:8px; font-weight:800; background:var(--card); text-transform:uppercase; color:var(--text);}
   
   .search-wrap{position:relative;}
   .search-input{
@@ -142,9 +139,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ЛОГІКА ЗБЕРЕЖЕННЯ (v13)
-let db = JSON.parse(localStorage.getItem('jelly_v13_db')) || [];
-let categories = JSON.parse(localStorage.getItem('jelly_v13_cats')) || {
+// ЛОГІКА ЗБЕРЕЖЕННЯ (v14)
+let db = JSON.parse(localStorage.getItem('jelly_v14_db')) || [];
+let categories = JSON.parse(localStorage.getItem('jelly_v14_cats')) || {
   'фрукти':'🍓','цитрус':'🍋','ягоди':'🍇','десерт':'🍰','ментол':'❄️','тютюн':'🌿','напій':'🥤','інше':'✨'
 };
 
@@ -152,8 +149,8 @@ let activeFilters = new Set();
 let selectedModalCats = new Set();
 
 function save() {
-  localStorage.setItem('jelly_v13_db', JSON.stringify(db));
-  localStorage.setItem('jelly_v13_cats', JSON.stringify(categories));
+  localStorage.setItem('jelly_v14_db', JSON.stringify(db));
+  localStorage.setItem('jelly_v14_cats', JSON.stringify(categories));
 }
 
 function getIcon(c) { return categories[c.toLowerCase()] || '✨'; }
