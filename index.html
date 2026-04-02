@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Jelly Lab</title>
+<title>Jelly Lab Pro</title>
 <link rel="apple-touch-icon" href="https://img.icons8.com/emoji/180/test-tube-emoji.png">
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -23,7 +24,8 @@
   body{display:flex;flex-direction:column;max-width:520px;margin:0 auto;}
   .header{padding:20px 16px 12px;background:var(--bg);z-index:10;}
   .logo{font-size:18px;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
-  .tools-btn{font-size:10px; opacity:0.8; cursor:pointer; padding:6px 12px; border:1.5px solid var(--border); border-radius:8px; font-weight:800; background:var(--card); text-transform:uppercase; color:var(--text);}
+  .sync-status{font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:4px;}
+  .sync-online{color:#10b981;}
   .search-wrap{position:relative;}
   .search-input{width:100%;padding:13px 44px;font-size:16px;font-family:var(--font);font-weight:500;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;}
   .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);pointer-events:none;}
@@ -57,32 +59,27 @@
   .btn-sub{background:var(--bg); color:var(--muted); border:1.5px solid var(--border);}
   .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:8px 16px; border-radius:999px; font-size:13px; opacity:0; transition:0.3s; z-index:100; pointer-events:none;}
   .toast.show{opacity:1;}
-  #universalInput{display:none;}
 </style>
 </head>
 <body>
+
 <div class="header">
-  <div class="logo"><span>🧪 Jelly Lab</span><button class="tools-btn" onclick="openToolsModal()">🛠 Інструменти</button></div>
+  <div class="logo">
+    <span>🧪 Jelly Lab Pro</span>
+    <div class="sync-status" id="syncStatus"><span>Cloud Sync</span> <span id="syncDot">●</span></div>
+  </div>
   <div class="search-wrap">
     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
     <input class="search-input" id="search" type="search" placeholder="Пошук смаку..." autocomplete="off">
   </div>
 </div>
+
 <div class="tags-container" id="tagRow"></div>
 <div class="stats-bar"><span id="statsCount">0 смаків</span><span class="manage-link" onclick="openCatModal()">⚙ Категорії</span></div>
 <div class="results" id="results"></div>
+
 <button class="fab" onclick="openModalForAdd()">➕ Додати смак</button>
-<div class="modal-overlay" id="toolsOverlay" onclick="if(event.target===this) closeToolsModal()">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 style="text-align:center; margin-bottom:20px;">Перенесення даних</h3>
-    <button class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="exportData()">Зберегти файл (Бекап)</button>
-    <button class="btn btn-sub" style="width:100%; margin-bottom:10px;" onclick="document.getElementById('universalInput').click()">Вибрати файл для імпорту</button>
-    <input type="file" id="universalInput" accept=".json,.csv" onchange="handleUniversalImport(event)">
-    <p style="font-size:11px; color:var(--muted); text-align:center; margin-top:10px;">Підтримує JSON бекапи та CSV файли</p>
-    <button class="btn btn-sub" style="width:100%; margin-top:20px;" onclick="closeToolsModal()">Закрити</button>
-  </div>
-</div>
+
 <div class="modal-overlay" id="overlay" onclick="if(event.target===this) closeModal()">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -93,10 +90,11 @@
     <div class="cat-grid" id="catGrid"></div>
     <div class="btn-row">
       <button class="btn btn-sub" onclick="closeModal()">Скасувати</button>
-      <button class="btn btn-primary" onclick="saveFlavor()">Зберегти</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveFlavor()">Зберегти</button>
     </div>
   </div>
 </div>
+
 <div class="modal-overlay" id="catOverlay" onclick="if(event.target===this) closeCatModal()">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -106,80 +104,187 @@
     <button class="btn btn-primary" style="width:100%" onclick="addNewCategory()">Додати категорію</button>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
-<script>
-let db = JSON.parse(localStorage.getItem('jelly_v15_db')) || [];
-let categories = JSON.parse(localStorage.getItem('jelly_v15_cats')) || {'фрукти':'🍓','цитрус':'🍋','ягоди':'🍇','десерт':'🍰','ментол':'❄️','тютюн':'🌿','напій':'🥤','інше':'✨'};
-let activeFilters = new Set();
-let selectedModalCats = new Set();
-function save() { localStorage.setItem('jelly_v15_db', JSON.stringify(db)); localStorage.setItem('jelly_v15_cats', JSON.stringify(categories)); }
-function getIcon(c) { return categories[c.toLowerCase()] || '✨'; }
-function renderTags() { document.getElementById('tagRow').innerHTML = Object.keys(categories).map(c => `<span class="tag ${activeFilters.has(c)?'active':''}" onclick="toggleFilter('${c}')">${getIcon(c)} ${c}</span>`).join(''); }
-function renderResults() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const filtered = db.filter(f => (f.name.toLowerCase().includes(q) || f.brand.toLowerCase().includes(q)) && (activeFilters.size === 0 || f.cats.some(c => activeFilters.has(c))));
-  document.getElementById('statsCount').textContent = `${filtered.length} смаків`;
-  const container = document.getElementById('results');
-  container.innerHTML = filtered.length ? filtered.map(f => `
-    <div class="card">
-      <div class="card-icon-wrap">${f.cats.map(c => getIcon(c)).join('')}</div>
-      <div class="card-body"><div class="card-name">${f.name}</div><div class="card-brand">${f.brand}</div><div class="badge-list">${f.cats.map(c => `<span class="badge">${getIcon(c)} ${c}</span>`).join('')}</div></div>
-      <div class="card-right"><button class="action-btn" onclick="openModalForEdit(${f.id})">✏️</button><button class="action-btn" onclick="deleteFlavor(${f.id})">🗑</button></div>
-    </div>`).join('') : `<div style="text-align:center; padding:40px; color:var(--muted)">Порожньо</div>`;
-}
-function toggleFilter(c) { activeFilters.has(c) ? activeFilters.delete(c) : activeFilters.add(c); renderTags(); renderResults(); }
-function openModalForAdd() { document.getElementById('modalTitle').textContent = "Новий смак"; document.getElementById('editFlavorId').value = ""; document.getElementById('inName').value = ""; document.getElementById('inBrand').value = "Jelly Lab"; selectedModalCats = new Set(['інше']); openModal(); }
-function openModalForEdit(id) { const f = db.find(x => x.id === id); document.getElementById('modalTitle').textContent = "Редагування"; document.getElementById('editFlavorId').value = f.id; document.getElementById('inName').value = f.name; document.getElementById('inBrand').value = f.brand; selectedModalCats = new Set(f.cats); openModal(); }
-function saveFlavor() {
-  const name = document.getElementById('inName').value.trim(); const brand = document.getElementById('inBrand').value.trim(); const editId = document.getElementById('editFlavorId').value;
-  if(!name || !selectedModalCats.size) return showToast("Заповніть дані");
-  const catsArr = Array.from(selectedModalCats);
-  if(editId) { const idx = db.findIndex(x => x.id == editId); db[idx] = { ...db[idx], name, brand, cats: catsArr }; }
-  else { db.unshift({ id: Date.now(), name, brand, cats: catsArr }); }
-  save(); renderResults(); closeModal();
-}
-function deleteFlavor(id) { if(!confirm("Видалити?")) return; db = db.filter(x => x.id !== id); save(); renderResults(); }
-function addNewCategory() {
-  const val = document.getElementById('newCatInput').value.trim(); if(!val) return;
-  const match = val.match(/(\p{Emoji_Presentation}|\p{Emoji})\s*(.+)/u);
-  let icon = '✨', name = val; if(match) { icon = match[1]; name = match[2].trim(); }
-  categories[name.toLowerCase()] = icon; document.getElementById('newCatInput').value = ''; save(); renderCatEditList(); renderTags(); renderResults();
-}
-function deleteCategory(name) { if(Object.keys(categories).length <= 1) return; delete categories[name]; db.forEach(f => { f.cats = f.cats.filter(c => c !== name); if(!f.cats.length) f.cats = ['інше']; }); save(); renderCatEditList(); renderTags(); renderResults(); }
-function renderCatEditList() { document.getElementById('catEditList').innerHTML = Object.entries(categories).map(([name, icon]) => `<div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); padding:10px; border-radius:12px; border:1px solid var(--border);"><span><b style="font-size:18px">${icon}</b> ${name}</span><button onclick="deleteCategory('${name}')" style="border:none; color:red; background:none; cursor:pointer; font-weight:700;">🗑</button></div>`).join(''); }
-function handleUniversalImport(e) {
-  const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const raw = ev.target.result;
-    try {
-      const data = JSON.parse(raw);
-      if(data.db && data.categories) { db = data.db; categories = data.categories; showToast("Дані відновлено з бекапу!"); }
-      else { throw new Error(); }
-    } catch(err) {
-      const lines = raw.split('\n').filter(l => l.trim() && !l.includes('{') && !l.includes('}'));
-      lines.forEach(line => {
-        const p = line.split(',').map(s => s.trim().replace(/^"|"$/g,''));
-        if(p[0] && p[0].length < 100) db.push({ id: Date.now() + Math.random(), name: p[0], brand: p[1]||'', cats: [(p[2]||'інше').toLowerCase()] });
-      });
-      showToast("CSV імпортовано!");
-    }
-    save(); renderTags(); renderResults(); closeToolsModal();
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDS4_JP8-KBxMph44EGVVHPyOlbNxZsAdE",
+    authDomain: "jellylab-17022.firebaseapp.com",
+    projectId: "jellylab-17022",
+    storageBucket: "jellylab-17022.firebasestorage.app",
+    messagingSenderId: "169234895045",
+    appId: "1:169234895045:web:a2cb1f7963d5ffbfe420ac",
+    databaseURL: "https://jellylab-17022-default-rtdb.europe-west1.firebasedatabase.app" // Я додав твій URL сюди
   };
-  reader.readAsText(file, 'UTF-8');
-}
-function exportData() { const blob = new Blob([JSON.stringify({db, categories}, null, 2)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `jelly_lab_backup.json`; a.click(); }
-function openToolsModal() { document.getElementById('toolsOverlay').classList.add('open'); }
-function closeToolsModal() { document.getElementById('toolsOverlay').classList.remove('open'); }
-function openCatModal() { document.getElementById('catOverlay').classList.add('open'); renderCatEditList(); }
-function closeCatModal() { document.getElementById('catOverlay').classList.remove('open'); }
-function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); }
-function openModal() { document.getElementById('overlay').classList.add('open'); renderCatGridInModal(); }
-function closeModal() { document.getElementById('overlay').classList.remove('open'); }
-function renderCatGridInModal() { document.getElementById('catGrid').innerHTML = Object.keys(categories).map(c => `<span class="cat-pill ${selectedModalCats.has(c)?'selected':''}" onclick="toggleModalCat('${c}')">${getIcon(c)} ${c}</span>`).join(''); }
-function toggleModalCat(c) { selectedModalCats.has(c) ? selectedModalCats.delete(c) : selectedModalCats.add(c); renderCatGridInModal(); }
-document.getElementById('search').oninput = renderResults;
-renderTags(); renderResults();
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const flavorsRef = ref(db, 'flavors');
+  const catsRef = ref(db, 'categories');
+
+  let localFlavors = [];
+  let localCats = {'фрукти':'🍓','цитрус':'🍋','ягоди':'🍇','десерт':'🍰','ментол':'❄️','тютюн':'🌿','напій':'🥤','інше':'✨'};
+  let activeFilters = new Set();
+  let selectedModalCats = new Set();
+
+  // --- СИНХРОНІЗАЦІЯ ---
+  onValue(flavorsRef, (snapshot) => {
+    const data = snapshot.val();
+    localFlavors = data ? Object.keys(data).map(key => ({id: key, ...data[key]})) : [];
+    localFlavors.reverse();
+    renderResults();
+    updateSyncStatus(true);
+  });
+
+  onValue(catsRef, (snapshot) => {
+    const data = snapshot.val();
+    if(data) localCats = data;
+    renderTags();
+    renderCatEditList();
+  });
+
+  function updateSyncStatus(ok) {
+    const dot = document.getElementById('syncDot');
+    dot.className = ok ? 'sync-online' : '';
+  }
+
+  // --- ЛОГІКА ІНТЕРФЕЙСУ ---
+  window.getIcon = (c) => localCats[c.toLowerCase()] || '✨';
+
+  window.renderTags = () => {
+    document.getElementById('tagRow').innerHTML = Object.keys(localCats).map(c => 
+      `<span class="tag ${activeFilters.has(c)?'active':''}" onclick="toggleFilter('${c}')">${getIcon(c)} ${c}</span>`
+    ).join('');
+  };
+
+  window.renderResults = () => {
+    const q = document.getElementById('search').value.toLowerCase();
+    const filtered = localFlavors.filter(f => 
+      (f.name.toLowerCase().includes(q) || f.brand.toLowerCase().includes(q)) && 
+      (activeFilters.size === 0 || f.cats.some(c => activeFilters.has(c)))
+    );
+    document.getElementById('statsCount').textContent = `${filtered.length} смаків`;
+    const container = document.getElementById('results');
+    container.innerHTML = filtered.length ? filtered.map(f => `
+      <div class="card">
+        <div class="card-icon-wrap">${f.cats.map(c => getIcon(c)).join('')}</div>
+        <div class="card-body">
+          <div class="card-name">${f.name}</div>
+          <div class="card-brand">${f.brand}</div>
+          <div class="badge-list">${f.cats.map(c => `<span class="badge">${getIcon(c)} ${c}</span>`).join('')}</div>
+        </div>
+        <div class="card-right">
+          <button class="action-btn" onclick="openModalForEdit('${f.id}')">✏️</button>
+          <button class="action-btn" onclick="deleteFlavor('${f.id}')">🗑</button>
+        </div>
+      </div>`).join('') : `<div style="text-align:center; padding:40px; color:var(--muted)">Завантаження або порожньо...</div>`;
+  };
+
+  window.toggleFilter = (c) => {
+    activeFilters.has(c) ? activeFilters.delete(c) : activeFilters.add(c);
+    renderTags(); renderResults();
+  };
+
+  // --- ФУНКЦІЇ ДІЙ ---
+  window.saveFlavor = async () => {
+    const name = document.getElementById('inName').value.trim();
+    const brand = document.getElementById('inBrand').value.trim();
+    const editId = document.getElementById('editFlavorId').value;
+    if(!name || !selectedModalCats.size) return showToast("Заповніть дані");
+    
+    const flavorData = { name, brand, cats: Array.from(selectedModalCats), timestamp: Date.now() };
+    
+    try {
+      if(editId) {
+        await update(ref(db, `flavors/${editId}`), flavorData);
+      } else {
+        await push(flavorsRef, flavorData);
+      }
+      closeModal();
+      showToast("Хмара оновлена ☁️");
+    } catch(e) { showToast("Помилка бази!"); }
+  };
+
+  window.deleteFlavor = async (id) => {
+    if(confirm("Видалити назавжди?")) {
+      await remove(ref(db, `flavors/${id}`));
+      showToast("Видалено всюди");
+    }
+  };
+
+  window.addNewCategory = async () => {
+    const val = document.getElementById('newCatInput').value.trim();
+    if(!val) return;
+    const match = val.match(/(\p{Emoji_Presentation}|\p{Emoji})\s*(.+)/u);
+    let icon = '✨', name = val;
+    if(match) { icon = match[1]; name = match[2].trim(); }
+    
+    localCats[name.toLowerCase()] = icon;
+    await set(catsRef, localCats);
+    document.getElementById('newCatInput').value = '';
+    showToast("Категорію додано");
+  };
+
+  window.deleteCategory = async (name) => {
+    if(Object.keys(localCats).length <= 1) return;
+    delete localCats[name];
+    await set(catsRef, localCats);
+  };
+
+  // --- МОДАЛКИ (допоміжні) ---
+  window.openModalForAdd = () => {
+    document.getElementById('modalTitle').textContent = "Новий смак";
+    document.getElementById('editFlavorId').value = "";
+    document.getElementById('inName').value = "";
+    document.getElementById('inBrand').value = "Jelly Lab";
+    selectedModalCats = new Set(['інше']);
+    openModal();
+  };
+
+  window.openModalForEdit = (id) => {
+    const f = localFlavors.find(x => x.id === id);
+    document.getElementById('modalTitle').textContent = "Редагування";
+    document.getElementById('editFlavorId').value = f.id;
+    document.getElementById('inName').value = f.name;
+    document.getElementById('inBrand').value = f.brand;
+    selectedModalCats = new Set(f.cats);
+    openModal();
+  };
+
+  window.renderCatEditList = () => {
+    document.getElementById('catEditList').innerHTML = Object.entries(localCats).map(([name, icon]) => `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); padding:10px; border-radius:12px; border:1px solid var(--border);">
+        <span><b style="font-size:18px">${icon}</b> ${name}</span>
+        <button onclick="deleteCategory('${name}')" style="border:none; color:red; background:none; cursor:pointer; font-weight:700;">🗑</button>
+      </div>`).join('');
+  };
+
+  window.openModal = () => { document.getElementById('overlay').classList.add('open'); renderCatGridInModal(); };
+  window.closeModal = () => document.getElementById('overlay').classList.remove('open');
+  window.openCatModal = () => { document.getElementById('catOverlay').classList.add('open'); renderCatEditList(); };
+  window.closeCatModal = () => document.getElementById('catOverlay').classList.remove('open');
+  
+  window.renderCatGridInModal = () => {
+    document.getElementById('catGrid').innerHTML = Object.keys(localCats).map(c => 
+      `<span class="cat-pill ${selectedModalCats.has(c)?'selected':''}" onclick="toggleModalCat('${c}')">${getIcon(c)} ${c}</span>`
+    ).join('');
+  };
+  window.toggleModalCat = (c) => {
+    selectedModalCats.has(c) ? selectedModalCats.delete(c) : selectedModalCats.add(c);
+    renderCatGridInModal();
+  };
+
+  window.showToast = (m) => { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); };
+  document.getElementById('search').oninput = renderResults;
+
+  // Перший рендер
+  renderTags();
+  renderResults();
 </script>
+
 </body>
 </html>
