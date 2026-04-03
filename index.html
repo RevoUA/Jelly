@@ -3,68 +3,75 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Jelly Lab v29 🧪</title>
+<title>Jelly Lab v30 🧪</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   :root{
     --bg:#141414;--card:#1e1e1e;--text:#f0efeb;--muted:#888;--border:#2a2a2a;
-    --accent:#3b82f6;--radius:12px;--font:'Manrope',sans-serif;
+    --accent:#3b82f6;--danger:#ef4444;--radius:12px;--font:'Manrope',sans-serif;
   }
   body{background:var(--bg);font-family:var(--font);color:var(--text);max-width:500px;margin:0 auto;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
   
   /* ULTRA COMPACT HEADER */
-  .header{padding:12px 16px 8px;background:var(--bg);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);}
-  .app-title{font-weight:800;font-size:18px;margin-bottom:8px;letter-spacing:-0.5px;display:flex;align-items:center;gap:6px;}
-  .search-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:#fff;outline:none;font-size:14px;height:40px;}
+  .header{padding:10px 16px 6px;background:var(--bg);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);}
+  .app-title{font-weight:800;font-size:16px;margin-bottom:6px;letter-spacing:-0.5px;}
   
-  /* COMPACT FILTERS */
-  .filters-area{padding:8px 16px;display:flex;flex-direction:column;gap:8px;background:var(--bg);}
-  .filter-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-  .section-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;width:100%;margin-bottom:-2px;}
+  .search-row{display:flex;gap:8px;align-items:center;}
+  .search-input{flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:#fff;outline:none;font-size:14px;height:36px;}
+  .reset-btn{width:36px;height:36px;border-radius:10px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.1);color:var(--danger);display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;}
+
+  /* FILTERS AREA */
+  .filters-area{padding:6px 16px;display:flex;flex-direction:column;gap:6px;background:var(--bg);}
+  .filter-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
   
-  .tag{padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;}
+  .tag{padding:5px 9px;border-radius:8px;font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:0.2s;}
   .tag.active{background:var(--accent);color:#fff;border-color:var(--accent);}
   .tag.more-btn{border-style:dashed;color:var(--accent);}
 
-  .brand-select{background:var(--card);color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:8px;font-size:12px;outline:none;flex:1;}
+  .brand-select{background:var(--card);color:var(--text);border:1px solid var(--border);padding:5px 8px;border-radius:8px;font-size:11px;outline:none;flex:1;height:28px;}
 
   /* CARDS */
-  .results{flex:1;overflow-y:auto;padding:8px 16px 100px;}
-  .card{background:var(--card);border-radius:var(--radius);padding:10px;display:flex;gap:12px;margin-bottom:10px;align-items:center;border:1px solid var(--border);}
-  .card-img{width:60px;height:60px;border-radius:10px;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);flex-shrink:0;}
+  .results{flex:1;overflow-y:auto;padding:6px 16px 100px;}
+  .card{background:var(--card);border-radius:var(--radius);padding:8px;display:flex;gap:10px;margin-bottom:8px;align-items:center;border:1px solid var(--border);}
+  .card-img{width:54px;height:54px;border-radius:8px;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);flex-shrink:0;}
   .card-img img{width:100%;height:100%;object-fit:cover;}
   
   .card-info{flex:1;min-width:0;}
-  .card-brand{font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;margin-bottom:2px;}
-  .card-name{font-size:14px;font-weight:700;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .badge-row{display:flex;flex-wrap:wrap;gap:4px;}
-  .badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#ccc;}
+  .card-brand{font-size:9px;font-weight:800;color:var(--accent);text-transform:uppercase;margin-bottom:1px;}
+  .card-name{font-size:13px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .badge-row{display:flex;flex-wrap:wrap;gap:3px;}
+  .badge{font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#ccc;}
   .vol-badge{color:var(--accent);border-color:rgba(59,130,246,0.3);}
 
-  .btn-icon{background:none;border:none;padding:5px;font-size:16px;opacity:0.4;}
+  .btn-icon{background:none;border:none;padding:4px;font-size:14px;opacity:0.3;}
 
-  /* MODAL COMPACT */
+  /* MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
   .modal-overlay.open{display:flex;}
   .modal{background:var(--card);width:100%;border-radius:20px 20px 0 0;padding:20px;max-height:95vh;overflow-y:auto;}
-  .field{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:#fff;margin-bottom:12px;font-size:15px;outline:none;}
-  .save-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:16px;}
+  .field{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:#fff;margin-bottom:10px;font-size:14px;outline:none;}
+  .save-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;}
+  .section-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
 
-  .fab{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#fff;border:none;width:56px;height:56px;border-radius:28px;font-size:24px;box-shadow:0 8px 20px rgba(0,0,0,0.4);z-index:20;}
+  .fab{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#fff;border:none;width:50px;height:50px;border-radius:25px;font-size:20px;box-shadow:0 8px 20px rgba(0,0,0,0.4);z-index:20;}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="app-title">🧪 Jelly Lab</div>
-  <input type="search" class="search-input" id="search" placeholder="Пошук смаку..." oninput="render()">
+  <div class="search-row">
+    <input type="search" class="search-input" id="search" placeholder="Пошук..." oninput="render()">
+    <div class="reset-btn" onclick="resetAll()">✕</div>
+  </div>
 </div>
 
 <div class="filters-area">
   <div class="filter-row" id="catsRow"></div>
-  <div style="display:flex; gap:8px; align-items:center;">
-    <div class="filter-row" id="volRow" style="flex-shrink:0;"></div>
+  
+  <div class="filter-row">
+    <div id="volRow" style="display:flex; gap:5px;"></div>
     <select class="brand-select" id="brandFilter" onchange="toggleBrand(this.value)"></select>
   </div>
 </div>
@@ -79,20 +86,20 @@
 
 <div class="modal-overlay" id="modal" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
-    <div style="width:40px;height:4px;background:var(--border);margin:0 auto 15px;border-radius:2px;"></div>
-    <div onclick="document.getElementById('fileIn').click()" style="width:100px;height:100px;margin:0 auto 15px;border:2px dashed var(--border);border-radius:15px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg);">
+    <div style="width:30px;height:3px;background:var(--border);margin:0 auto 15px;border-radius:2px;"></div>
+    <div onclick="document.getElementById('fileIn').click()" style="width:80px;height:80px;margin:0 auto 15px;border:2px dashed var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg);">
         <img id="preview" style="display:none;width:100%;height:100%;object-fit:cover;">
-        <span id="pLabel" style="font-size:10px;color:var(--muted);">📷 ФОТО</span>
+        <span id="pLabel" style="font-size:9px;color:var(--muted);">📷 ФОТО</span>
         <input type="file" id="fileIn" hidden accept="image/*" onchange="handleFile(this)">
     </div>
     <input type="text" id="inName" class="field" placeholder="Назва смаку">
     <select id="inBrand" class="field"></select>
     
-    <div class="section-label" style="margin-bottom:8px;">Об'єм</div>
-    <div class="filter-row" id="modalVol" style="margin-bottom:15px;"></div>
+    <div class="section-label">Об'єм</div>
+    <div class="filter-row" id="modalVol" style="margin-bottom:12px;"></div>
     
-    <div class="section-label" style="margin-bottom:8px;">Категорії</div>
-    <div id="modalCats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>
+    <div class="section-label">Категорії</div>
+    <div id="modalCats" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:15px;"></div>
     
     <button class="save-btn" onclick="save()">Зберегти смак</button>
   </div>
@@ -112,7 +119,7 @@
   const app = initializeApp(config);
   const db = getDatabase(app);
 
-  let flavors = [], cats = {}, brands = [], activeCat = null, activeVol = null, activeBrand = "", selectedCats = new Set(), selectedVol = "30мл", editId = null, base64Img = "", showAllCats = false;
+  let flavors = [], cats = {}, brands = [], activeCat = null, activeVol = null, activeBrand = "", selectedCats = new Set(), selectedVol = "30ml", editId = null, base64Img = "", showAllCats = false;
   const volumes = ["10мл", "15мл", "30мл"];
 
   onValue(ref(db, '/'), s => {
@@ -124,32 +131,39 @@
   });
 
   window.renderFilters = () => {
-    // Категорії 4 + Ще
+    // 1. Категорії 3 + Ще (сортування за популярністю)
     const counts = {};
     flavors.forEach(f => f.cats.forEach(c => counts[c] = (counts[c]||0)+1));
     const sortedCats = Object.keys(cats).sort((a,b) => (counts[b]||0) - (counts[a]||0));
     
     let catHtml = '';
     sortedCats.forEach((c, idx) => {
-      if (showAllCats || idx < 4 || c === activeCat) {
+      if (showAllCats || idx < 3 || c === activeCat) {
         catHtml += `<div class="tag ${activeCat===c?'active':''}" onclick="toggleCat('${c}')">${cats[c]} ${c}</div>`;
       }
     });
-    if (sortedCats.length > 4) catHtml += `<div class="tag more-btn" onclick="window.showAllCats=!window.showAllCats; renderFilters()">${window.showAllCats?'▴':'Ще ▾'}</div>`;
+    if (sortedCats.length > 3) catHtml += `<div class="tag more-btn" onclick="window.showAllCats=!window.showAllCats; renderFilters()">${window.showAllCats?'▴':'Ще ▾'}</div>`;
     document.getElementById('catsRow').innerHTML = catHtml;
 
-    // Об'єми
+    // 2. Об'єми
     document.getElementById('volRow').innerHTML = volumes.map(v => `
       <div class="tag ${activeVol===v?'active':''}" onclick="toggleVol('${v}')">${v}</div>`).join('');
 
-    // Бренди (Select)
+    // 3. Бренди (Select)
     const bSelect = document.getElementById('brandFilter');
-    bSelect.innerHTML = `<option value="">Всі бренди</option>` + brands.map(b => `<option value="${b}" ${activeBrand===b?'selected':''}>${b}</option>`).join('');
+    bSelect.innerHTML = `<option value="">Бренди: Всі</option>` + brands.map(b => `<option value="${b}" ${activeBrand===b?'selected':''}>${b}</option>`).join('');
   };
 
   window.toggleCat = (c) => { activeCat = (activeCat === c) ? null : c; render(); renderFilters(); };
   window.toggleVol = (v) => { activeVol = (activeVol === v) ? null : v; render(); renderFilters(); };
   window.toggleBrand = (b) => { activeBrand = b; render(); };
+
+  window.resetAll = () => {
+    document.getElementById('search').value = "";
+    activeCat = null; activeVol = null; activeBrand = "";
+    showAllCats = false;
+    render(); renderFilters();
+  };
 
   window.render = () => {
     const q = document.getElementById('search').value.toLowerCase();
@@ -171,7 +185,7 @@
             ${f.cats.map(c => `<span class="badge">${cats[c]||'✨'} ${c}</span>`).join('')}
           </div>
         </div>
-        <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; flex-direction:column; gap:8px;">
           <button class="btn-icon" onclick="openEdit('${f.id}')">✏️</button>
           <button class="btn-icon" onclick="del('${f.id}')">🗑</button>
         </div>
@@ -200,9 +214,11 @@
     renderModalVol(); renderModalCats();
   };
 
+  window.setModalVol = (v) => { selectedVol = v; renderModalVol(); };
+
   window.renderModalVol = () => {
     document.getElementById('modalVol').innerHTML = volumes.map(v => `
-      <div class="tag ${selectedVol===v?'active':''}" onclick="window.selectedVol='${v}'; renderModalVol()">${v}</div>`).join('');
+      <div class="tag ${selectedVol===v?'active':''}" onclick="setModalVol('${v}')">${v}</div>`).join('');
   };
 
   window.renderModalCats = () => {
