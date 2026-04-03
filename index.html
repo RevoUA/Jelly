@@ -131,9 +131,9 @@
   const app = initializeApp(config);
   const db = getDatabase(app);
 
-  let flavors = [], cats = {}, brands = [], activeCat = null, activeVol = null, activeBrand = "", editId = null, base64Img = "";
+  // ЗМІНА 1: activeCat → activeCats як Set для мультивибору
+  let flavors = [], cats = {}, brands = [], activeCats = new Set(), activeVol = null, activeBrand = "", editId = null, base64Img = "";
   
-  // КЛЮЧОВЕ: Глобальні стейти для вибору в модалці
   window.selectedCats = new Set();
   window.selectedVol = "30мл";
   window.isExpanded = false;
@@ -148,16 +148,31 @@
     render(); renderFilters();
   });
 
-  window.toggleCat = (c) => { activeCat = (activeCat === c) ? null : c; render(); renderFilters(); };
+  // ЗМІНА 2: toggleCat працює з Set
+  window.toggleCat = (c) => {
+    activeCats.has(c) ? activeCats.delete(c) : activeCats.add(c);
+    render(); renderFilters();
+  };
+
   window.toggleVol = (v) => { activeVol = (activeVol === v) ? null : v; render(); renderFilters(); };
-  window.resetAll = () => { document.getElementById('search').value = ""; activeCat = null; activeVol = null; activeBrand = ""; window.isExpanded = false; render(); renderFilters(); };
+
+  // ЗМІНА 5: resetAll скидає Set
+  window.resetAll = () => {
+    document.getElementById('search').value = "";
+    activeCats = new Set();
+    activeVol = null;
+    activeBrand = "";
+    window.isExpanded = false;
+    render(); renderFilters();
+  };
 
   window.renderFilters = () => {
     const sc = Object.keys(cats).sort();
     let h = '';
-    sc.forEach((c, i) => { 
-      if (window.isExpanded || i < 3 || c === activeCat) {
-        h += `<div class="tag ${activeCat===c?'active':''}" onclick="toggleCat('${c}')">${cats[c]} ${c}</div>`;
+    sc.forEach((c, i) => {
+      // ЗМІНА 3: перевірка через .has()
+      if (window.isExpanded || i < 3 || activeCats.has(c)) {
+        h += `<div class="tag ${activeCats.has(c)?'active':''}" onclick="toggleCat('${c}')">${cats[c]} ${c}</div>`;
       }
     });
     if (sc.length > 3) {
@@ -170,9 +185,10 @@
 
   window.render = () => {
     const q = document.getElementById('search').value.toLowerCase();
-    const fArr = flavors.filter(f => 
+    const fArr = flavors.filter(f =>
       (f.name.toLowerCase().includes(q) || (f.brand && f.brand.toLowerCase().includes(q))) &&
-      (!activeCat || (f.cats && f.cats.includes(activeCat))) &&
+      // ЗМІНА 4: мультивибір — смак підходить якщо має хоча б одну з обраних категорій
+      (activeCats.size === 0 || (f.cats && f.cats.some(c => activeCats.has(c)))) &&
       (!activeVol || f.vol === activeVol) &&
       (!activeBrand || f.brand === activeBrand)
     ).sort((a,b) => a.name.localeCompare(b.name));
@@ -194,7 +210,6 @@
 
   window.zoom = (s) => { document.getElementById('zoomImg').src = s; document.getElementById('zoomOverlay').style.display = 'flex'; };
 
-  // ЛОГІКА МОДАЛКИ
   window.toggleMC = (c) => { 
     if(window.selectedCats.has(c)) window.selectedCats.delete(c); 
     else window.selectedCats.add(c); 
@@ -221,7 +236,7 @@
   window.openEdit = (id) => {
     const f = flavors.find(x => x.id === id); 
     editId = id; base64Img = f.img || ""; window.selectedVol = f.vol || "30мл";
-    window.selectedCats = new Set(f.cats || []); // ПРИМУСОВИЙ SET ДЛЯ МУЛЬТИСЕЛЕКТУ
+    window.selectedCats = new Set(f.cats || []);
     document.getElementById('inName').value = f.name;
     document.getElementById('inBrand').innerHTML = `<option value="">Оберіть бренд</option>` + brands.map(b=>`<option value="${b}" ${f.brand===b?'selected':''}>${b}</option>`).join('');
     if(f.img) { document.getElementById('preview').src = f.img; document.getElementById('preview').style.display = 'block'; document.getElementById('pLabel').style.display = 'none'; }
