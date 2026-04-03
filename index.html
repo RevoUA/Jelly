@@ -3,51 +3,55 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Jelly Lab v28 🧪</title>
+<title>Jelly Lab v29 🧪</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   :root{
-    --bg:#141414;--card:#1e1e1e;--text:#f0efeb;--muted:#666;--border:#2a2a2a;
-    --accent:#3b82f6;--radius:16px;--font:'Manrope',sans-serif;
+    --bg:#141414;--card:#1e1e1e;--text:#f0efeb;--muted:#888;--border:#2a2a2a;
+    --accent:#3b82f6;--radius:12px;--font:'Manrope',sans-serif;
   }
-  body{background:var(--bg);font-family:var(--font);color:var(--text);max-width:520px;margin:0 auto;display:flex;flex-direction:column;height:100vh;}
+  body{background:var(--bg);font-family:var(--font);color:var(--text);max-width:500px;margin:0 auto;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
   
-  .header{padding:20px 16px 8px;background:var(--bg);position:sticky;top:0;z-index:10;}
-  .app-title{font-weight:800;font-size:22px;margin-bottom:16px;letter-spacing:-0.5px;}
-  .search-input{width:100%;padding:14px 18px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:#fff;outline:none;font-size:16px;}
+  /* ULTRA COMPACT HEADER */
+  .header{padding:12px 16px 8px;background:var(--bg);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);}
+  .app-title{font-weight:800;font-size:18px;margin-bottom:8px;letter-spacing:-0.5px;display:flex;align-items:center;gap:6px;}
+  .search-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:#fff;outline:none;font-size:14px;height:40px;}
   
-  /* SMART HYBRID TAGS */
-  .tags-container{padding:0 16px 16px;}
-  .tags-flex{display:flex;flex-wrap:wrap;gap:8px;}
-  .tag{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;}
+  /* COMPACT FILTERS */
+  .filters-area{padding:8px 16px;display:flex;flex-direction:column;gap:8px;background:var(--bg);}
+  .filter-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .section-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;width:100%;margin-bottom:-2px;}
+  
+  .tag{padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;}
   .tag.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .tag.more-btn{background:none;border-style:dashed;color:var(--accent);border-color:rgba(59,130,246,0.4);}
+  .tag.more-btn{border-style:dashed;color:var(--accent);}
 
-  .results{flex:1;overflow-y:auto;padding:0 16px 100px;}
-  .card{background:var(--card);border-radius:var(--radius);padding:12px;display:flex;gap:14px;margin-bottom:12px;align-items:center;border:1px solid var(--border);}
-  .card-img{width:74px;height:74px;border-radius:12px;background:var(--bg);object-fit:cover;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;}
+  .brand-select{background:var(--card);color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:8px;font-size:12px;outline:none;flex:1;}
+
+  /* CARDS */
+  .results{flex:1;overflow-y:auto;padding:8px 16px 100px;}
+  .card{background:var(--card);border-radius:var(--radius);padding:10px;display:flex;gap:12px;margin-bottom:10px;align-items:center;border:1px solid var(--border);}
+  .card-img{width:60px;height:60px;border-radius:10px;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);flex-shrink:0;}
   .card-img img{width:100%;height:100%;object-fit:cover;}
   
   .card-info{flex:1;min-width:0;}
-  .card-brand{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;margin-bottom:4px;letter-spacing:0.5px;}
-  .card-name{font-size:16px;font-weight:700;margin-bottom:8px;line-height:1.25;}
-  .badge-row{display:flex;flex-wrap:wrap;gap:6px;}
-  .badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,0.05);color:var(--text);border:1px solid rgba(255,255,255,0.1);}
+  .card-brand{font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;margin-bottom:2px;}
+  .card-name{font-size:14px;font-weight:700;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .badge-row{display:flex;flex-wrap:wrap;gap:4px;}
+  .badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#ccc;}
+  .vol-badge{color:var(--accent);border-color:rgba(59,130,246,0.3);}
 
-  .btn-icon{background:none;border:none;cursor:pointer;font-size:18px;opacity:0.4;}
+  .btn-icon{background:none;border:none;padding:5px;font-size:16px;opacity:0.4;}
 
-  #zoomOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(15px);}
-  #zoomImg{max-width:100%;max-height:70vh;border-radius:20px;}
-
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:flex-end;z-index:100;backdrop-filter:blur(8px);}
+  /* MODAL COMPACT */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;z-index:100;backdrop-filter:blur(4px);}
   .modal-overlay.open{display:flex;}
-  .modal{background:var(--card);width:100%;border-radius:28px 28px 0 0;padding:28px;max-height:90vh;overflow-y:auto;}
-  
-  .field{width:100%;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:14px;color:#fff;margin-bottom:16px;font-size:16px;outline:none;}
-  .save-btn{width:100%;padding:18px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-weight:800;font-size:17px;margin-top:10px;}
+  .modal{background:var(--card);width:100%;border-radius:20px 20px 0 0;padding:20px;max-height:95vh;overflow-y:auto;}
+  .field{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:#fff;margin-bottom:12px;font-size:15px;outline:none;}
+  .save-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:16px;}
 
-  .fab{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border:none;padding:18px 36px;border-radius:50px;font-weight:800;z-index:20;display:flex;align-items:center;gap:8px;}
+  .fab{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#fff;border:none;width:56px;height:56px;border-radius:28px;font-size:24px;box-shadow:0 8px 20px rgba(0,0,0,0.4);z-index:20;}
 </style>
 </head>
 <body>
@@ -57,30 +61,40 @@
   <input type="search" class="search-input" id="search" placeholder="Пошук смаку..." oninput="render()">
 </div>
 
-<div class="tags-container" id="tagsContainer">
-  <div class="tags-flex" id="tags"></div>
+<div class="filters-area">
+  <div class="filter-row" id="catsRow"></div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <div class="filter-row" id="volRow" style="flex-shrink:0;"></div>
+    <select class="brand-select" id="brandFilter" onchange="toggleBrand(this.value)"></select>
+  </div>
 </div>
 
 <div class="results" id="results"></div>
 
-<button class="fab" onclick="openAdd()">➕ Додати смак</button>
+<button class="fab" onclick="openAdd()">＋</button>
 
-<div id="zoomOverlay" onclick="this.style.display='none'">
-  <img id="zoomImg" src="">
+<div id="zoomOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;display:none;align-items:center;justify-content:center;" onclick="this.style.display='none'">
+  <img id="zoomImg" style="max-width:90%;max-height:80%;border-radius:12px;">
 </div>
 
 <div class="modal-overlay" id="modal" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
-    <div style="width:45px;height:5px;background:var(--border);margin:0 auto 24px;border-radius:10px;"></div>
-    <div onclick="document.getElementById('fileIn').click()" style="width:120px;height:120px;margin:0 auto 20px;border:2px dashed var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg);">
+    <div style="width:40px;height:4px;background:var(--border);margin:0 auto 15px;border-radius:2px;"></div>
+    <div onclick="document.getElementById('fileIn').click()" style="width:100px;height:100px;margin:0 auto 15px;border:2px dashed var(--border);border-radius:15px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg);">
         <img id="preview" style="display:none;width:100%;height:100%;object-fit:cover;">
-        <span id="pLabel" style="font-size:10px;color:var(--muted);text-align:center;">📷<br>ФОТО</span>
+        <span id="pLabel" style="font-size:10px;color:var(--muted);">📷 ФОТО</span>
         <input type="file" id="fileIn" hidden accept="image/*" onchange="handleFile(this)">
     </div>
     <input type="text" id="inName" class="field" placeholder="Назва смаку">
     <select id="inBrand" class="field"></select>
-    <div id="modalCats" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;"></div>
-    <button class="save-btn" onclick="save()">Зберегти</button>
+    
+    <div class="section-label" style="margin-bottom:8px;">Об'єм</div>
+    <div class="filter-row" id="modalVol" style="margin-bottom:15px;"></div>
+    
+    <div class="section-label" style="margin-bottom:8px;">Категорії</div>
+    <div id="modalCats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>
+    
+    <button class="save-btn" onclick="save()">Зберегти смак</button>
   </div>
 </div>
 
@@ -98,76 +112,52 @@
   const app = initializeApp(config);
   const db = getDatabase(app);
 
-  let flavors = [], cats = {}, brands = [], activeFilter = null, selectedCats = new Set(), editId = null, base64Img = "", showAllCats = false;
+  let flavors = [], cats = {}, brands = [], activeCat = null, activeVol = null, activeBrand = "", selectedCats = new Set(), selectedVol = "30мл", editId = null, base64Img = "", showAllCats = false;
+  const volumes = ["10мл", "15мл", "30мл"];
 
   onValue(ref(db, '/'), s => {
     const d = s.val() || {};
     flavors = d.flavors ? Object.entries(d.flavors).map(([id,v])=>({id,...v})) : [];
     cats = d.categories || {'інше':'✨'};
-    brands = d.brands || [];
-    render(); renderTags();
+    brands = (d.brands || []).sort();
+    render(); renderFilters();
   });
 
-  window.renderTags = () => {
-    const keys = Object.keys(cats);
-    const container = document.getElementById('tags');
-    let html = '';
+  window.renderFilters = () => {
+    // Категорії 4 + Ще
+    const counts = {};
+    flavors.forEach(f => f.cats.forEach(c => counts[c] = (counts[c]||0)+1));
+    const sortedCats = Object.keys(cats).sort((a,b) => (counts[b]||0) - (counts[a]||0));
     
-    // Відображаємо або всі, або лише активну + перші 3
-    keys.forEach((c, idx) => {
-      if (showAllCats || c === activeFilter || idx < 3) {
-        html += `<div class="tag ${activeFilter===c?'active':''}" onclick="toggleF('${c}')">${cats[c]} ${c}</div>`;
+    let catHtml = '';
+    sortedCats.forEach((c, idx) => {
+      if (showAllCats || idx < 4 || c === activeCat) {
+        catHtml += `<div class="tag ${activeCat===c?'active':''}" onclick="toggleCat('${c}')">${cats[c]} ${c}</div>`;
       }
     });
+    if (sortedCats.length > 4) catHtml += `<div class="tag more-btn" onclick="window.showAllCats=!window.showAllCats; renderFilters()">${window.showAllCats?'▴':'Ще ▾'}</div>`;
+    document.getElementById('catsRow').innerHTML = catHtml;
 
-    if (!showAllCats && keys.length > 3) {
-      html += `<div class="tag more-btn" onclick="showAll()">Всі категорії ▾</div>`;
-    } else if (showAllCats) {
-      html += `<div class="tag more-btn" onclick="showAll()">Згорнути ▴</div>`;
-    }
+    // Об'єми
+    document.getElementById('volRow').innerHTML = volumes.map(v => `
+      <div class="tag ${activeVol===v?'active':''}" onclick="toggleVol('${v}')">${v}</div>`).join('');
 
-    container.innerHTML = html;
+    // Бренди (Select)
+    const bSelect = document.getElementById('brandFilter');
+    bSelect.innerHTML = `<option value="">Всі бренди</option>` + brands.map(b => `<option value="${b}" ${activeBrand===b?'selected':''}>${b}</option>`).join('');
   };
 
-  window.showAll = () => { showAllCats = !showAllCats; renderTags(); };
-  window.toggleF = (c) => { activeFilter = (activeFilter === c) ? null : c; render(); renderTags(); };
-
-  window.zoom = (src) => { document.getElementById('zoomImg').src = src; document.getElementById('zoomOverlay').style.display = 'flex'; };
-
-  window.handleFile = (el) => {
-    const file = el.files[0];
-    if(!file) return;
-    const img = new Image();
-    img.src = URL.createObjectURL(file);
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const size = 300;
-      canvas.width = size; canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      const min = Math.min(img.width, img.height);
-      ctx.drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size);
-      base64Img = canvas.toDataURL('image/jpeg', 0.7);
-      document.getElementById('preview').src = base64Img;
-      document.getElementById('preview').style.display = 'block';
-      document.getElementById('pLabel').style.display = 'none';
-    };
-  };
-
-  window.save = async () => {
-    const name = document.getElementById('inName').value.trim();
-    const brand = document.getElementById('inBrand').value;
-    if(!name || !brand) return;
-    const data = { name, brand, img: base64Img, cats: Array.from(selectedCats), ts: Date.now() };
-    if(editId) await update(ref(db, `flavors/${editId}`), data);
-    else await push(ref(db, 'flavors'), data);
-    closeAdd();
-  };
+  window.toggleCat = (c) => { activeCat = (activeCat === c) ? null : c; render(); renderFilters(); };
+  window.toggleVol = (v) => { activeVol = (activeVol === v) ? null : v; render(); renderFilters(); };
+  window.toggleBrand = (b) => { activeBrand = b; render(); };
 
   window.render = () => {
     const q = document.getElementById('search').value.toLowerCase();
     const filtered = flavors.filter(f => 
       (f.name.toLowerCase().includes(q) || f.brand.toLowerCase().includes(q)) &&
-      (!activeFilter || f.cats.includes(activeFilter))
+      (!activeCat || f.cats.includes(activeCat)) &&
+      (!activeVol || f.vol === activeVol) &&
+      (!activeBrand || f.brand === activeBrand)
     ).sort((a,b) => a.name.localeCompare(b.name));
 
     document.getElementById('results').innerHTML = filtered.map(f => `
@@ -176,9 +166,12 @@
         <div class="card-info">
           <div class="card-brand">${f.brand}</div>
           <div class="card-name">${f.name}</div>
-          <div class="badge-row">${f.cats.map(c => `<span class="badge">${cats[c]||'✨'} ${c}</span>`).join('')}</div>
+          <div class="badge-row">
+            <span class="badge vol-badge">${f.vol || '30мл'}</span>
+            ${f.cats.map(c => `<span class="badge">${cats[c]||'✨'} ${c}</span>`).join('')}
+          </div>
         </div>
-        <div class="card-btns">
+        <div style="display:flex; flex-direction:column; gap:10px;">
           <button class="btn-icon" onclick="openEdit('${f.id}')">✏️</button>
           <button class="btn-icon" onclick="del('${f.id}')">🗑</button>
         </div>
@@ -186,13 +179,13 @@
   };
 
   window.openAdd = () => {
-    editId = null; base64Img = "";
+    editId = null; base64Img = ""; selectedVol = "30мл";
     document.getElementById('inName').value = "";
     document.getElementById('preview').style.display = 'none';
     document.getElementById('pLabel').style.display = 'block';
-    document.getElementById('inBrand').innerHTML = `<option value="" disabled selected>Виберіть бренд</option>` + brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+    document.getElementById('inBrand').innerHTML = brands.map(b=>`<option value="${b}">${b}</option>`).join('');
     selectedCats = new Set(['інше']);
-    renderModalCats();
+    renderModalVol(); renderModalCats();
     document.getElementById('modal').classList.add('open');
   };
 
@@ -201,9 +194,15 @@
     openAdd(); editId = id;
     document.getElementById('inName').value = f.name;
     document.getElementById('inBrand').value = f.brand;
+    selectedVol = f.vol || "30мл";
     if(f.img) { base64Img = f.img; document.getElementById('preview').src = f.img; document.getElementById('preview').style.display = 'block'; document.getElementById('pLabel').style.display = 'none'; }
     selectedCats = new Set(f.cats);
-    renderModalCats();
+    renderModalVol(); renderModalCats();
+  };
+
+  window.renderModalVol = () => {
+    document.getElementById('modalVol').innerHTML = volumes.map(v => `
+      <div class="tag ${selectedVol===v?'active':''}" onclick="window.selectedVol='${v}'; renderModalVol()">${v}</div>`).join('');
   };
 
   window.renderModalCats = () => {
@@ -212,6 +211,36 @@
   };
 
   window.toggleMC = (c) => { selectedCats.has(c) ? selectedCats.delete(c) : selectedCats.add(c); renderModalCats(); };
+  
+  window.save = async () => {
+    const name = document.getElementById('inName').value.trim();
+    const brand = document.getElementById('inBrand').value;
+    if(!name || !brand) return;
+    const data = { name, brand, vol: selectedVol, img: base64Img, cats: Array.from(selectedCats), ts: Date.now() };
+    if(editId) await update(ref(db, `flavors/${editId}`), data);
+    else await push(ref(db, 'flavors'), data);
+    closeAdd();
+  };
+
+  window.handleFile = (el) => {
+    const file = el.files[0];
+    if(!file) return;
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 300; canvas.height = 300;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, 300, 300);
+      base64Img = canvas.toDataURL('image/jpeg', 0.7);
+      document.getElementById('preview').src = base64Img;
+      document.getElementById('preview').style.display = 'block';
+      document.getElementById('pLabel').style.display = 'none';
+    };
+  };
+
+  window.zoom = (src) => { document.getElementById('zoomImg').src = src; document.getElementById('zoomOverlay').style.display = 'flex'; };
   window.del = (id) => { if(confirm("Видалити?")) remove(ref(db, `flavors/${id}`)); };
   window.closeAdd = () => document.getElementById('modal').classList.remove('open');
 </script>
