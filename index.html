@@ -3,344 +3,246 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Jelly Lab Pro v20</title>
-<link rel="apple-touch-icon" href="https://img.icons8.com/emoji/180/test-tube-emoji.png">
-
+<title>Jelly Lab Pro v23 📸⚡</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   :root{
     --bg:#141414;--card:#1e1e1e;--text:#f0efeb;--muted:#666;--border:#2a2a2a;
-    --accent:#3b82f6;--accent-bg:#1e3a5f;--accent-text:#93c5fd;
-    --radius:14px;--radius-sm:8px;--font:'Manrope',sans-serif;
+    --accent:#3b82f6;--radius:16px;--font:'Manrope',sans-serif;
   }
-  html,body{height:100%;background:var(--bg);font-family:var(--font);color:var(--text);overflow:hidden;}
-  body{display:flex;flex-direction:column;max-width:520px;margin:0 auto;}
+  body{background:var(--bg);font-family:var(--font);color:var(--text);max-width:520px;margin:0 auto;display:flex;flex-direction:column;height:100vh;}
   
-  .header{padding:16px 16px 8px;background:var(--bg);z-index:10;}
-  .logo{font-size:16px;font-weight:800;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
-  .sync-status{font-size:9px; font-weight:800; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:4px;}
+  .header{padding:16px;background:var(--bg);position:sticky;top:0;z-index:10;}
+  .search-input{width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:#fff;outline:none;font-size:16px;}
   
-  .search-wrap{position:relative; margin-bottom:12px;}
-  .search-input{width:100%;padding:10px 40px;font-size:15px;font-family:var(--font);font-weight:500;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;}
-  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none;}
-  
-  .tags-wrapper{padding:0 16px 8px; background:var(--bg);}
-  .tags-container{display:flex; flex-wrap:wrap; gap:5px; transition: all 0.3s ease;}
-  .tag{padding:5px 10px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--card); color:var(--muted); transition:0.2s; white-space:nowrap; display:flex; align-items:center; gap:4px;}
-  .tag.active{background:var(--accent-bg); border-color:var(--accent); color:var(--accent-text);}
-  .tag.more-btn{background:var(--bg); border-style:dashed; color:var(--accent);}
-  
-  .hidden-tags{display:none; width:100%; margin-top:5px; padding-top:5px; border-top:1px dashed var(--border);}
-  .hidden-tags.expanded{display:flex; flex-wrap:wrap; gap:5px;}
+  .tags-wrapper{padding:0 16px 12px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
+  .tag{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--border);white-space:nowrap;color:var(--muted);}
+  .tag.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 
-  .stats-bar{padding:4px 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between;}
-  .manage-link{color:var(--accent); cursor:pointer;}
-
-  .results{flex:1; overflow-y:auto; padding:0 16px 120px;}
-  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:12px; display:flex; align-items:flex-start; gap:10px; margin-bottom:8px;}
-  .card-icon-wrap{display:flex; gap:2px; flex-wrap:wrap; width:36px; font-size:16px; justify-content:center;}
-  .card-body{flex:1; min-width:0;}
-  .card-name{font-size:14px; font-weight:700;}
-  .card-brand{font-size:10px; color:var(--accent); font-weight:800; text-transform:uppercase; margin-bottom:2px;}
-  .badge-list{display:flex; flex-wrap:wrap; gap:3px; margin-top:4px;}
-  .badge{font-size:8px; font-weight:800; padding:1px 5px; border-radius:4px; background:var(--accent-bg); color:var(--accent-text); text-transform:uppercase;}
+  .results{flex:1;overflow-y:auto;padding:0 16px 100px;}
+  .card{background:var(--card);border-radius:var(--radius);padding:10px;display:flex;gap:12px;margin-bottom:10px;align-items:center;border:1px solid var(--border);}
   
-  .action-btn{background:none; border:none; font-size:14px; cursor:pointer; padding:4px; color:var(--muted);}
+  .card-img{width:70px;height:70px;border-radius:10px;background:var(--bg);object-fit:cover;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;}
+  
+  .card-info{flex:1;min-width:0;}
+  .card-brand{font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;margin-bottom:2px;}
+  .card-name{font-size:15px;font-weight:700;margin-bottom:6px;line-height:1.2;}
+  
+  .badge-row{display:flex;flex-wrap:wrap;gap:4px;}
+  .badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.05);color:var(--text);border:1px solid rgba(255,255,255,0.1);}
 
-  .fab{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; border:none; padding:14px 28px; border-radius:999px; font-size:14px; font-weight:800; box-shadow:0 8px 20px rgba(37,99,235,.3); z-index:20;}
+  .card-btns{display:flex;flex-direction:column;gap:12px;padding-right:4px;}
+  .btn-icon{background:none;border:none;cursor:pointer;font-size:16px;opacity:0.5;}
 
-  .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:30; display:none; align-items:flex-end; justify-content:center; backdrop-filter:blur(2px);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;z-index:100;backdrop-filter:blur(5px);}
   .modal-overlay.open{display:flex;}
-  .modal{background:var(--card); border-radius:20px 20px 0 0; width:100%; max-width:520px; padding:20px; max-height:90vh; overflow-y:auto;}
-  .modal-handle{width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px;}
+  .modal{background:var(--card);width:100%;border-radius:24px 24px 0 0;padding:24px;max-height:95vh;overflow-y:auto;}
   
-  .label-text{font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; margin-bottom:6px; display:block;}
-  .field-input, .field-select{width:100%; padding:12px; font-size:16px; font-family:var(--font); margin-bottom:16px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); outline:none; appearance:none;}
-  
-  .horizontal-scroll{display:flex; gap:6px; overflow-x:auto; padding-bottom:10px; margin-bottom:16px; scrollbar-width:none;}
-  .horizontal-scroll::-webkit-scrollbar{display:none;}
-  
-  .btn-row{display:flex; gap:8px;}
-  .btn{flex:1; padding:14px; border-radius:var(--radius-sm); border:none; font-weight:700; cursor:pointer;}
-  .btn-primary{background:var(--accent); color:#fff;}
-  .btn-sub{background:var(--bg); color:var(--muted); border:1.5px solid var(--border);}
-  
-  .edit-item-row{display:flex; align-items:center; gap:10px; background:var(--bg); padding:8px 12px; border-radius:12px; margin-bottom:8px; border:1px solid var(--border);}
-  .edit-item-row input{flex:1; background:none; border:none; font-family:var(--font); font-weight:700; color:var(--text); font-size:14px; outline:none;}
+  .img-preview-box{width:120px;height:120px;margin:0 auto 20px;border-radius:16px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--bg);}
+  .img-preview-box img{width:100%;height:100%;object-fit:cover;}
+  .img-label{font-size:10px;text-align:center;color:var(--muted);font-weight:700;}
 
-  .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:6px 14px; border-radius:999px; font-size:12px; opacity:0; transition:0.3s; z-index:100; pointer-events:none;}
-  .toast.show{opacity:1;}
+  .field{width:100%;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:#fff;margin-bottom:12px;font-family:var(--font);font-size:16px;outline:none;}
+  .save-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:16px;margin-top:10px;transition:0.2s;}
+  .save-btn:disabled{opacity:0.5;filter:grayscale(1);}
+
+  .fab{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border:none;padding:16px 32px;border-radius:50px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.5);z-index:20;}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">
+  <div style="font-weight:800;font-size:18px;margin-bottom:12px;display:flex;justify-content:space-between;">
     <span>🧪 Jelly Lab Pro</span>
-    <div class="sync-status"><span>Online</span> <span id="syncDot">●</span></div>
+    <span style="font-size:10px;color:var(--muted)">v23⚡</span>
   </div>
-  <div class="search-wrap">
-    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="search-input" id="search" type="search" placeholder="Пошук смаку..." autocomplete="off">
-  </div>
+  <input type="search" class="search-input" id="search" placeholder="Пошук смаку..." oninput="render()">
 </div>
 
-<div class="tags-wrapper">
-  <div class="tags-container" id="tagRow"></div>
-  <div class="hidden-tags" id="hiddenTags"></div>
-</div>
-
-<div class="stats-bar"><span id="statsCount">0 смаків</span><span class="manage-link" onclick="openCatModal()">⚙ Налаштування</span></div>
+<div class="tags-wrapper" id="tags"></div>
 <div class="results" id="results"></div>
 
-<button class="fab" onclick="openModalForAdd()">➕ Новий смак</button>
+<button class="fab" onclick="openAdd()">➕ Новий смак</button>
 
-<div class="modal-overlay" id="overlay" onclick="if(event.target===this) closeModal()">
+<div class="modal-overlay" id="modal" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 id="modalTitle" style="text-align:center; margin-bottom:16px; font-size:16px;">Додати / Редагувати</h3>
-    <input type="hidden" id="editFlavorId">
+    <div style="width:40px;height:4px;background:var(--border);margin:0 auto 20px;border-radius:2px;"></div>
     
-    <span class="label-text">Назва</span>
-    <input class="field-input" id="inName" placeholder="Наприклад: Банан Полуниця">
-
-    <span class="label-text">Бренд</span>
-    <select class="field-select" id="brandSelect" onchange="if(this.value==='ADD_NEW'){openCatModal(); this.value='';}"></select>
-
-    <span class="label-text">Категорії</span>
-    <div class="horizontal-scroll" id="catGrid"></div>
-
-    <div class="btn-row">
-      <button class="btn btn-sub" onclick="closeModal()">Скасувати</button>
-      <button class="btn btn-primary" onclick="saveFlavor()">Зберегти</button>
+    <div class="img-preview-box" onclick="document.getElementById('fileIn').click()">
+      <img id="preview" src="" style="display:none;">
+      <div class="img-label" id="imgPlaceholder">📷<br>Додати фото</div>
+      <input type="file" id="fileIn" hidden accept="image/*" onchange="handleFile(this)">
     </div>
+
+    <input type="text" id="inName" class="field" placeholder="Наприклад: Банан Полуниця">
+    <select id="inBrand" class="field"></select>
+    
+    <div style="font-size:10px;font-weight:800;color:var(--muted);margin-bottom:8px;text-transform:uppercase;">Категорії:</div>
+    <div id="modalCats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>
+
+    <button class="save-btn" id="saveBtn" onclick="save()">Зберегти</button>
   </div>
 </div>
-
-<div class="modal-overlay" id="catOverlay" onclick="if(event.target===this) closeCatModal()">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h3 style="margin-bottom:16px; text-align:center; font-size:16px;">Налаштування списків</h3>
-    
-    <span class="label-text">Бренди</span>
-    <div id="brandEditList" style="margin-bottom:12px;"></div>
-    <div style="display:flex; gap:8px; margin-bottom:20px;">
-        <input class="field-input" style="margin-bottom:0" id="newBrandInput" placeholder="Додати бренд">
-        <button class="btn btn-primary" style="padding:0 15px" onclick="addNewBrand()">+</button>
-    </div>
-
-    <span class="label-text">Категорії</span>
-    <div id="catEditList" style="margin-bottom:12px;"></div>
-    <div style="display:flex; gap:8px; margin-bottom:16px;">
-        <input class="field-input" style="margin-bottom:0" id="newCatInput" placeholder="🍎 Фрукти">
-        <button class="btn btn-primary" style="padding:0 15px" onclick="addNewCategory()">+</button>
-    </div>
-    <button class="btn btn-sub" style="width:100%" onclick="closeCatModal()">Готово</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-  const firebaseConfig = {
+  const config = {
     apiKey: "AIzaSyDS4_JP8-KBxMph44EGVVHPyOlbNxZsAdE",
     authDomain: "jellylab-17022.firebaseapp.com",
     projectId: "jellylab-17022",
     storageBucket: "jellylab-17022.firebasestorage.app",
-    messagingSenderId: "169234895045",
-    appId: "1:169234895045:web:a2cb1f7963d5ffbfe420ac",
     databaseURL: "https://jellylab-17022-default-rtdb.europe-west1.firebasedatabase.app"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const app = initializeApp(config);
   const db = getDatabase(app);
-  
-  let localFlavors = [];
-  let localCats = {'фрукти':'🍓','цитрус':'🍋','ягоди':'🍇','десерт':'🍰','ментол':'❄️','тютюн':'🌿','напій':'🥤','інше':'✨'};
-  let localBrands = [];
-  let activeFilters = new Set();
-  let selectedModalCats = new Set();
-  let isCatsExpanded = false;
+  const storage = getStorage(app);
 
-  onValue(ref(db, 'flavors'), (s) => {
-    const data = s.val();
-    localFlavors = data ? Object.keys(data).map(k => ({id:k, ...data[k]})) : [];
-    localFlavors.sort((a,b) => a.name.localeCompare(b.name, 'uk'));
-    renderResults();
-    renderTags();
-    document.getElementById('syncDot').style.color = '#10b981';
+  let flavors = [], cats = {}, brands = [], activeFilter = null, selectedCats = new Set(), editId = null, compressedBlob = null;
+
+  onValue(ref(db, '/'), s => {
+    const d = s.val() || {};
+    flavors = d.flavors ? Object.entries(d.flavors).map(([id,v])=>({id,...v})) : [];
+    cats = d.categories || {'інше':'✨'};
+    brands = d.brands || [];
+    render(); renderTags();
   });
 
-  onValue(ref(db, 'categories'), (s) => {
-    if(s.val()) localCats = s.val();
-    renderTags();
-  });
+  // ФУНКЦІЯ СТИСНЕННЯ (500px + Square Crop)
+  async function handleFile(el) {
+    const file = el.files[0];
+    if(!file) return;
 
-  onValue(ref(db, 'brands'), (s) => {
-    localBrands = s.val() || [];
-    localBrands.sort((a,b) => a.localeCompare(b, 'uk'));
-    renderBrandSelect();
-  });
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const size = 500;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
 
-  window.renderTags = () => {
-    const counts = {};
-    Object.keys(localCats).forEach(c => counts[c] = 0);
-    localFlavors.forEach(f => (f.cats || []).forEach(c => { if(counts[c] !== undefined) counts[c]++; }));
+      // Обрізка в квадрат (center crop)
+      const minSide = Math.min(img.width, img.height);
+      const sx = (img.width - minSide) / 2;
+      const sy = (img.height - minSide) / 2;
 
-    const sortedNames = Object.keys(localCats).sort((a,b) => (counts[b] - counts[a]) || a.localeCompare(b, 'uk'));
-    const top5 = sortedNames.slice(0, 5);
-    const rest = sortedNames.slice(5);
+      ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+      
+      canvas.toBlob((blob) => {
+        compressedBlob = blob;
+        document.getElementById('preview').src = URL.createObjectURL(blob);
+        document.getElementById('preview').style.display = 'block';
+        document.getElementById('imgPlaceholder').style.display = 'none';
+      }, 'image/jpeg', 0.8);
+    };
+  }
 
-    const tagHtml = (name) => `<span class="tag ${activeFilters.has(name)?'active':''}" onclick="toggleFilter('${name}')">${localCats[name]} ${name}</span>`;
-
-    document.getElementById('tagRow').innerHTML = top5.map(tagHtml).join('') + 
-      (rest.length > 0 ? `<span class="tag more-btn" onclick="toggleCatsExpand()">${isCatsExpanded ? 'Згорнути ▲' : 'Ще ▼'}</span>` : '');
-    
-    const hiddenWrap = document.getElementById('hiddenTags');
-    hiddenWrap.innerHTML = rest.sort((a,b) => a.localeCompare(b, 'uk')).map(tagHtml).join('');
-    hiddenWrap.className = isCatsExpanded ? 'hidden-tags expanded' : 'hidden-tags';
-  };
-
-  window.toggleCatsExpand = () => { isCatsExpanded = !isCatsExpanded; renderTags(); };
-  window.toggleFilter = (c) => {
-    activeFilters.has(c) ? activeFilters.delete(c) : activeFilters.add(c);
-    renderTags(); renderResults();
-  };
-
-  window.renderResults = () => {
-    const q = document.getElementById('search').value.toLowerCase();
-    const filtered = localFlavors.filter(f => 
-      (f.name.toLowerCase().includes(q) || (f.brand || '').toLowerCase().includes(q)) && 
-      (activeFilters.size === 0 || f.cats.some(c => activeFilters.has(c)))
-    );
-    document.getElementById('statsCount').textContent = `${filtered.length} смаків`;
-    document.getElementById('results').innerHTML = filtered.map(f => `
-      <div class="card">
-        <div class="card-icon-wrap">${(f.cats || []).map(c => localCats[c] || '✨').join('')}</div>
-        <div class="card-body">
-          <div class="card-brand">${f.brand || 'No Brand'}</div>
-          <div class="card-name">${f.name}</div>
-          <div class="badge-list">${(f.cats || []).map(c => `<span class="badge">${localCats[c]||'✨'} ${c}</span>`).join('')}</div>
-        </div>
-        <div class="card-right" style="display:flex; flex-direction:column; gap:8px;">
-          <button class="action-btn" onclick="openModalForEdit('${f.id}')">✏️</button>
-          <button class="action-btn" onclick="deleteFlavor('${f.id}')">🗑</button>
-        </div>
-      </div>`).join('');
-  };
-
-  window.renderBrandSelect = () => {
-    const select = document.getElementById('brandSelect');
-    let html = `<option value="" disabled selected>Оберіть бренд...</option>`;
-    html += localBrands.map(b => `<option value="${b}">${b}</option>`).join('');
-    html += `<option value="ADD_NEW">+ Додати новий бренд...</option>`;
-    select.innerHTML = html;
-  };
-
-  window.renderCatGridInModal = () => {
-    const sorted = Object.keys(localCats).sort((a,b) => a.localeCompare(b, 'uk'));
-    document.getElementById('catGrid').innerHTML = sorted.map(c => 
-      `<div class="tag ${selectedModalCats.has(c)?'active':''}" style="font-size:13px; padding:8px 12px;" onclick="toggleModalCat('${c}')">${localCats[c]} ${c}</div>`
-    ).join('');
-  };
-
-  window.toggleModalCat = (c) => {
-    selectedModalCats.has(c) ? selectedModalCats.delete(c) : selectedModalCats.add(c);
-    renderCatGridInModal();
-  };
-
-  window.saveFlavor = async () => {
+  window.save = async () => {
     const name = document.getElementById('inName').value.trim();
-    const brand = document.getElementById('brandSelect').value;
-    const editId = document.getElementById('editFlavorId').value;
-    if(!name || !brand) return;
-    const data = { name, brand, cats: Array.from(selectedModalCats), ts: Date.now() };
+    const brand = document.getElementById('inBrand').value;
+    if(!name || !brand) return alert("Вкажіть назву та бренд");
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.innerText = "Завантаження...";
+
+    let imgUrl = editId ? flavors.find(f=>f.id===editId).img : "";
+
+    if(compressedBlob) {
+      const sLink = sRef(storage, `flavors/${Date.now()}.jpg`);
+      await uploadBytes(sLink, compressedBlob);
+      imgUrl = await getDownloadURL(sLink);
+    }
+
+    const data = { name, brand, img: imgUrl, cats: Array.from(selectedCats), ts: Date.now() };
     if(editId) await update(ref(db, `flavors/${editId}`), data);
     else await push(ref(db, 'flavors'), data);
-    closeModal();
+    
+    closeAdd();
   };
 
-  window.addNewBrand = async () => {
-    const val = document.getElementById('newBrandInput').value.trim();
-    if(!val) return;
-    localBrands.push(val);
-    await set(ref(db, 'brands'), localBrands);
-    document.getElementById('newBrandInput').value = '';
+  window.render = () => {
+    const q = document.getElementById('search').value.toLowerCase();
+    const filtered = flavors.filter(f => 
+      (f.name.toLowerCase().includes(q) || f.brand.toLowerCase().includes(q)) &&
+      (!activeFilter || f.cats.includes(activeFilter))
+    ).sort((a,b) => a.name.localeCompare(b.name));
+
+    document.getElementById('results').innerHTML = filtered.map(f => `
+      <div class="card">
+        <div class="card-img">${f.img ? `<img src="${f.img}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">` : '🧪'}</div>
+        <div class="card-info">
+          <div class="card-brand">${f.brand}</div>
+          <div class="card-name">${f.name}</div>
+          <div class="badge-row">
+            ${f.cats.map(c => `<span class="badge">${cats[c]||'✨'} ${c}</span>`).join('')}
+          </div>
+        </div>
+        <div class="card-btns">
+          <button class="btn-icon" onclick="openEdit('${f.id}')">✏️</button>
+          <button class="btn-icon" onclick="del('${f.id}')">🗑</button>
+        </div>
+      </div>
+    `).join('');
   };
 
-  window.deleteBrand = async (index) => {
-    if(confirm("Видалити бренд?")) {
-      localBrands.splice(index, 1);
-      await set(ref(db, 'brands'), localBrands);
-    }
+  window.renderTags = () => {
+    document.getElementById('tags').innerHTML = Object.keys(cats).map(c => `
+      <div class="tag ${activeFilter===c?'active':''}" onclick="toggleF('${c}')">${cats[c]} ${c}</div>
+    `).join('');
   };
 
-  window.addNewCategory = async () => {
-    const val = document.getElementById('newCatInput').value.trim();
-    if(!val) return;
-    const match = val.match(/(\p{Emoji_Presentation}|\p{Emoji})\s*(.+)/u);
-    let icon = '✨', name = val;
-    if(match) { icon = match[1]; name = match[2].trim(); }
-    localCats[name.toLowerCase()] = icon;
-    await set(ref(db, 'categories'), localCats);
-    document.getElementById('newCatInput').value = '';
-  };
-
-  window.deleteCategory = async (n) => { 
-    if(confirm("Видалити категорію?")) {
-        delete localCats[n]; 
-        await set(ref(db, 'categories'), localCats); 
-    }
-  };
-
-  window.openModalForAdd = () => {
-    document.getElementById('editFlavorId').value = "";
+  window.toggleF = (c) => { activeFilter = (activeFilter === c) ? null : c; render(); renderTags(); };
+  
+  window.openAdd = () => {
+    editId = null; compressedBlob = null;
     document.getElementById('inName').value = "";
-    document.getElementById('brandSelect').value = ""; // Скидаємо бренд
-    selectedModalCats = new Set(['інше']);
-    document.getElementById('overlay').classList.add('open');
-    renderCatGridInModal();
+    document.getElementById('fileIn').value = "";
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('imgPlaceholder').style.display = 'block';
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('saveBtn').innerText = "Зберегти";
+    
+    const bSel = document.getElementById('inBrand');
+    bSel.innerHTML = `<option value="" disabled selected>Бренд</option>` + brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+    
+    selectedCats = new Set(['інше']);
+    renderModalCats();
+    document.getElementById('modal').classList.add('open');
   };
 
-  window.openModalForEdit = (id) => {
-    const f = localFlavors.find(x => x.id === id);
-    document.getElementById('editFlavorId').value = f.id;
+  window.openEdit = (id) => {
+    const f = flavors.find(x => x.id === id);
+    openAdd();
+    editId = id;
     document.getElementById('inName').value = f.name;
-    document.getElementById('brandSelect').value = f.brand || "";
-    selectedModalCats = new Set(f.cats || []);
-    document.getElementById('overlay').classList.add('open');
-    renderCatGridInModal();
+    document.getElementById('inBrand').value = f.brand;
+    if(f.img) {
+      document.getElementById('preview').src = f.img;
+      document.getElementById('preview').style.display = 'block';
+      document.getElementById('imgPlaceholder').style.display = 'none';
+    }
+    selectedCats = new Set(f.cats);
+    renderModalCats();
   };
 
-  window.closeModal = () => document.getElementById('overlay').classList.remove('open');
-  window.openCatModal = () => { document.getElementById('catOverlay').classList.add('open'); renderCatEditList(); renderBrandEditList(); };
-  window.closeCatModal = () => document.getElementById('catOverlay').classList.remove('open');
-
-  window.renderBrandEditList = () => {
-    document.getElementById('brandEditList').innerHTML = localBrands.map((b, i) => `
-      <div class="edit-item-row">
-        <input type="text" value="${b}" readonly>
-        <button onclick="deleteBrand(${i})" style="border:none;background:none;color:red">🗑</button>
-      </div>`).join('');
+  window.renderModalCats = () => {
+    document.getElementById('modalCats').innerHTML = Object.keys(cats).map(c => `
+      <div class="tag ${selectedCats.has(c)?'active':''}" onclick="toggleMC('${c}')">${cats[c]} ${c}</div>
+    `).join('');
   };
 
-  window.renderCatEditList = () => {
-    const sorted = Object.entries(localCats).sort((a,b) => a[0].localeCompare(b[0], 'uk'));
-    document.getElementById('catEditList').innerHTML = sorted.map(([n, i]) => `
-      <div class="edit-item-row">
-        <span>${i} ${n}</span>
-        <button onclick="deleteCategory('${n}')" style="border:none;background:none;color:red">🗑</button>
-      </div>`).join('');
+  window.toggleMC = (c) => { 
+    selectedCats.has(c) ? selectedCats.delete(c) : selectedCats.add(c); 
+    renderModalCats(); 
   };
 
-  document.getElementById('search').oninput = renderResults;
-  renderTags(); renderResults();
+  window.del = (id) => { if(confirm("Видалити?")) remove(ref(db, `flavors/${id}`)); };
+  window.closeAdd = () => document.getElementById('modal').classList.remove('open');
 </script>
 </body>
 </html>
