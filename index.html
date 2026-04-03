@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Jelly Lab v37 🪼</title>
+<title>Jelly Lab v39 🪼</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -26,15 +26,15 @@
 
   .filters-area{padding:0 16px 10px;display:flex;flex-direction:column;gap:8px;}
   .filter-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-  .tag{padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;user-select:none;}
-  .tag.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .tag{padding:6px 12px;border-radius:10px;font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;user-select:none;transition: 0.2s;}
+  .tag.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow: 0 4px 12px rgba(59,130,246,0.3);}
   .tag.more-btn{border-style:dashed;color:var(--accent);}
   
   .brand-select{background:var(--card);color:var(--text);border:1px solid var(--border);padding:0 8px;border-radius:8px;font-size:11px;outline:none;flex:1;height:30px;}
 
   .results{flex:1;overflow-y:auto;padding:0 16px 100px;}
   .card{background:var(--card);border-radius:var(--radius);padding:10px;display:flex;gap:12px;margin-bottom:10px;align-items:center;border:1px solid var(--border);}
-  .card-img{width:54px;height:54px;border-radius:8px;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);flex-shrink:0;cursor:pointer;}
+  .card-img{width:54px;height:54px;border-radius:8px;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);flex-shrink:0;}
   .card-img img{width:100%;height:100%;object-fit:cover;}
   .card-info{flex:1;min-width:0;}
   .card-brand{font-size:9px;font-weight:800;color:var(--accent);text-transform:uppercase;}
@@ -52,10 +52,8 @@
   .save-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;margin-top:20px;cursor:pointer;}
   .fab{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#fff;border:none;width:56px;height:56px;border-radius:28px;font-size:24px;box-shadow:0 8px 24px rgba(0,0,0,0.5);z-index:20;cursor:pointer;}
 
-  .manage-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;border:1px solid var(--border);}
-  .action-btn{font-size:14px;opacity:0.6;cursor:pointer;padding:4px;}
-
   #zoomOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;display:none;align-items:center;justify-content:center;}
+  .manage-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;border:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -151,9 +149,7 @@
   window.resetAll = () => { document.getElementById('search').value = ""; activeCat = null; activeVol = null; activeBrand = ""; showAllCats = false; render(); renderFilters(); };
 
   window.renderFilters = () => {
-    const counts = {};
-    flavors.forEach(f => (f.cats||[]).forEach(c => counts[c] = (counts[c]||0)+1));
-    const sortedCats = Object.keys(cats).sort((a,b) => (counts[b]||0) - (counts[a]||0));
+    const sortedCats = Object.keys(cats).sort();
     let html = '';
     sortedCats.forEach((c, i) => { if (showAllCats || i < 3 || c === activeCat) html += `<div class="tag ${activeCat===c?'active':''}" onclick="toggleCat('${c}')">${cats[c]} ${c}</div>`; });
     if (sortedCats.length > 3) html += `<div class="tag more-btn" onclick="toggleShowAll()">${showAllCats?'▴':'Ще ▾'}</div>`;
@@ -161,8 +157,6 @@
     document.getElementById('volRow').innerHTML = volumes.map(v => `<div class="tag ${activeVol===v?'active':''}" onclick="toggleVol('${v}')">${v}</div>`).join('');
     document.getElementById('brandFilter').innerHTML = `<option value="">Всі бренди</option>` + brands.map(b => `<option value="${b}" ${activeBrand===b?'selected':''}>${b}</option>`).join('');
   };
-
-  window.zoom = (src) => { document.getElementById('zoomImg').src = src; document.getElementById('zoomOverlay').style.display = 'flex'; };
 
   window.render = () => {
     const q = document.getElementById('search').value.toLowerCase();
@@ -176,7 +170,7 @@
     document.getElementById('results').innerHTML = filtered.map(f => `
       <div class="card">
         <div class="card-img" onclick="if('${f.img}') zoom('${f.img}')">${f.img ? `<img src="${f.img}">` : '🪼'}</div>
-        <div class="card-info">
+        <div class="card-info" onclick="openEdit('${f.id}')">
           <div class="card-brand">${f.brand || ''}</div>
           <div class="card-name">${f.name}</div>
           <div class="badge-row">
@@ -184,72 +178,22 @@
             ${(f.cats||[]).map(c => `<span class="badge">${cats[c]||'✨'} ${c}</span>`).join('')}
           </div>
         </div>
-        <div style="display:flex; flex-direction:column; gap:6px;">
-          <button style="background:none; border:none; opacity:0.3; font-size:16px; cursor:pointer;" onclick="openEdit('${f.id}')">✏️</button>
-          <button style="background:none; border:none; opacity:0.3; font-size:16px; cursor:pointer;" onclick="delFlavor('${f.id}')">🗑</button>
-        </div>
+        <button style="background:none; border:none; opacity:0.3; font-size:16px; cursor:pointer; padding:10px;" onclick="delFlavor('${f.id}')">🗑</button>
       </div>`).join('');
   };
 
-  window.openManage = (type) => {
-    const modal = document.getElementById('manageModal');
-    const title = document.getElementById('manageTitle');
-    const content = document.getElementById('manageContent');
-    modal.classList.add('open');
-
-    if(type === 'brands') {
-      title.innerHTML = `Бренди <span onclick="addBrandPrompt()" style="color:var(--accent); cursor:pointer; font-size:12px;">+ Додати</span>`;
-      content.innerHTML = brands.map(b => `
-        <div class="manage-list-item">
-          <span>${b}</span>
-          <div class="manage-actions">
-            <span class="action-btn" onclick="editBrandPrompt('${b}')">✏️</span>
-            <span class="action-btn" onclick="delBrand('${b}')">🗑</span>
-          </div>
-        </div>`).join('');
-    } else {
-      title.innerHTML = `Категорії <span onclick="addCatPrompt()" style="color:var(--accent); cursor:pointer; font-size:12px;">+ Додати</span>`;
-      content.innerHTML = Object.entries(cats).map(([name, emo]) => `
-        <div class="manage-list-item">
-          <span>${emo} ${name}</span>
-          <div class="manage-actions">
-            <span class="action-btn" onclick="editCatPrompt('${name}')">✏️</span>
-            <span class="action-btn" onclick="delCat('${name}')">🗑</span>
-          </div>
-        </div>`).join('');
-    }
-  };
-
-  window.addBrandPrompt = () => { const n = prompt("Назва бренду:"); if(n) set(ref(db, 'brands'), [...brands, n]); openManage('brands'); };
-  window.editBrandPrompt = (old) => { 
-    const n = prompt("Нова назва бренду:", old); 
-    if(n && n !== old) {
-      set(ref(db, 'brands'), brands.map(b => b === old ? n : b));
-      flavors.forEach(f => { if(f.brand === old) update(ref(db, `flavors/${f.id}`), {brand: n}); });
-    }
-    openManage('brands');
-  };
-  window.delBrand = (n) => { if(confirm("Видалити бренд?")) set(ref(db, 'brands'), brands.filter(b => b !== n)); openManage('brands'); };
-
-  window.addCatPrompt = () => { 
-    const n = prompt("Назва категорії:"); const e = prompt("Емодзі:", "✨"); 
-    if(n) update(ref(db, 'categories'), {[n]: e || "✨"}); openManage('cats'); 
-  };
-  window.editCatPrompt = (old) => {
-    const n = prompt("Нова назва:", old); const e = prompt("Нове емодзі:", cats[old]);
-    if(n) {
-      if(n !== old) remove(ref(db, `categories/${old}`));
-      update(ref(db, 'categories'), {[n]: e || "✨"});
-    }
-    openManage('cats');
-  };
-  window.delCat = (n) => { if(confirm("Видалити категорію?")) remove(ref(db, `categories/${n}`)); openManage('cats'); };
+  window.zoom = (src) => { document.getElementById('zoomImg').src = src; document.getElementById('zoomOverlay').style.display = 'flex'; };
+  window.setModalVol = (v) => { selectedVol = v; renderModalVol(); };
+  window.renderModalVol = () => { document.getElementById('modalVol').innerHTML = volumes.map(v => `<div class="tag ${selectedVol===v?'active':''}" onclick="setModalVol('${v}')">${v}</div>`).join(''); };
+  window.renderModalCats = () => { document.getElementById('modalCats').innerHTML = Object.keys(cats).map(c => `<div class="tag ${selectedCats.has(c)?'active':''}" onclick="toggleMC('${c}')">${cats[c]} ${c}</div>`).join(''); };
+  window.toggleMC = (c) => { selectedCats.has(c) ? selectedCats.delete(c) : selectedCats.add(c); renderModalCats(); };
 
   window.openAdd = () => {
     editId = null; base64Img = ""; selectedVol = "30мл"; selectedCats = new Set(['інше']);
     document.getElementById('inName').value = ""; document.getElementById('preview').style.display = 'none';
     document.getElementById('pLabel').style.display = 'block';
-    document.getElementById('inBrand').innerHTML = brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+    const brandOpts = `<option value="">Оберіть бренд</option>` + brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+    document.getElementById('inBrand').innerHTML = brandOpts;
     renderModalVol(); renderModalCats();
     document.getElementById('modal').classList.add('open');
   };
@@ -257,33 +201,41 @@
   window.openEdit = (id) => {
     const f = flavors.find(x => x.id === id); openAdd(); editId = id;
     document.getElementById('inName').value = f.name;
-    setTimeout(() => document.getElementById('inBrand').value = f.brand, 100);
+    setTimeout(() => { document.getElementById('inBrand').value = f.brand || ""; }, 50);
     selectedVol = f.vol || "30мл"; selectedCats = new Set(f.cats || []);
     if(f.img) { base64Img = f.img; document.getElementById('preview').src = f.img; document.getElementById('preview').style.display = 'block'; document.getElementById('pLabel').style.display = 'none'; }
     renderModalVol(); renderModalCats();
   };
 
-  window.renderModalVol = () => {
-    document.getElementById('modalVol').innerHTML = volumes.map(v => `
-      <div class="tag ${selectedVol===v?'active':''}" onclick="window.selectedVol='${v}'; window.renderModalVol()">${v}</div>`).join('');
-  };
-
-  window.renderModalCats = () => {
-    document.getElementById('modalCats').innerHTML = Object.keys(cats).map(c => `
-      <div class="tag ${selectedCats.has(c)?'active':''}" onclick="toggleMC('${c}')">${cats[c]} ${c}</div>`).join('');
-  };
-
-  window.toggleMC = (c) => { selectedCats.has(c) ? selectedCats.delete(c) : selectedCats.add(c); renderModalCats(); };
-
   window.save = async () => {
     const name = document.getElementById('inName').value.trim();
     const brand = document.getElementById('inBrand').value;
-    if(!name) return alert("Введи назву смаку!");
+    if(!name) return alert("Введіть назву смаку!");
+    if(!brand) return alert("Оберіть бренд!");
     const data = { name, brand, vol: selectedVol, img: base64Img, cats: Array.from(selectedCats), ts: Date.now() };
     if(editId) await update(ref(db, `flavors/${editId}`), data);
     else await push(ref(db, 'flavors'), data);
     closeAdd();
   };
+
+  window.openManage = (type) => {
+    const modal = document.getElementById('manageModal');
+    const title = document.getElementById('manageTitle');
+    const content = document.getElementById('manageContent');
+    modal.classList.add('open');
+    if(type==='brands') {
+      title.innerHTML = `Бренди <span onclick="addBrand()" style="color:var(--accent); cursor:pointer;">+ Додати</span>`;
+      content.innerHTML = brands.map(b => `<div class="manage-list-item"><span>${b}</span><span onclick="delBrand('${b}')">🗑</span></div>`).join('');
+    } else {
+      title.innerHTML = `Категорії <span onclick="addCat()" style="color:var(--accent); cursor:pointer;">+ Додати</span>`;
+      content.innerHTML = Object.entries(cats).map(([n,e]) => `<div class="manage-list-item"><span>${e} ${n}</span><span onclick="delCat('${n}')">🗑</span></div>`).join('');
+    }
+  };
+
+  window.addBrand = () => { const n = prompt("Бренд:"); if(n) set(ref(db, 'brands'), [...brands, n]); openManage('brands'); };
+  window.delBrand = (n) => { if(confirm("Видалити?")) set(ref(db, 'brands'), brands.filter(b=>b!==n)); openManage('brands'); };
+  window.addCat = () => { const n = prompt("Назва:"), e = prompt("Емодзі:","✨"); if(n) update(ref(db,'categories'),{[n]:e}); openManage('cats'); };
+  window.delCat = (n) => { if(confirm("Видалити?")) remove(ref(db,`categories/${n}`)); openManage('cats'); };
 
   window.handleFile = (el) => {
     const file = el.files[0]; if(!file) return;
@@ -297,7 +249,7 @@
     };
   };
 
-  window.delFlavor = (id) => { if(confirm("Видалити цей смак?")) remove(ref(db, `flavors/${id}`)); };
+  window.delFlavor = (id) => { if(confirm("Видалити?")) remove(ref(db, `flavors/${id}`)); };
   window.closeAdd = () => document.getElementById('modal').classList.remove('open');
 </script>
 </body>
