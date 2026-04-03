@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Jelly Lab v32 🪼</title>
+<title>Jelly Lab v33 🪼</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -46,7 +46,8 @@
   .modal-overlay.open{display:flex;}
   .modal{background:var(--card);width:100%;border-radius:20px 20px 0 0;padding:20px;max-height:95vh;overflow-y:auto;}
   .field{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:#fff;margin-bottom:10px;font-size:14px;outline:none;}
-  .section-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin:12px 0 6px;}
+  .section-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin:12px 0 6px;display:flex;justify-content:space-between;align-items:center;}
+  .add-small{color:var(--accent);font-size:10px;cursor:pointer;text-decoration:underline;}
   .save-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;margin-top:20px;}
 
   .fab{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#fff;border:none;width:50px;height:50px;border-radius:25px;font-size:20px;box-shadow:0 8px 20px rgba(0,0,0,0.4);z-index:20;}
@@ -85,13 +86,16 @@
         <span id="pLabel" style="font-size:9px;color:var(--muted);">📷 ФОТО</span>
         <input type="file" id="fileIn" hidden accept="image/*" onchange="handleFile(this)">
     </div>
-    <input type="text" id="inName" class="field" placeholder="Назва смаку">
+    
+    <div class="section-label">Бренд <span class="add-small" onclick="addNewBrand()">+ Новий</span></div>
     <select id="inBrand" class="field"></select>
+
+    <input type="text" id="inName" class="field" placeholder="Назва смаку">
     
     <div class="section-label">Об'єм</div>
-    <div class="filter-row" id="modalVol"></div>
+    <div class="filter-row" id="modalVol" style="margin-bottom:10px;"></div>
     
-    <div class="section-label">Категорії</div>
+    <div class="section-label">Категорії <span class="add-small" onclick="addNewCat()">+ Нова</span></div>
     <div id="modalCats" class="filter-row"></div>
     
     <button class="save-btn" onclick="save()">Зберегти смак</button>
@@ -100,7 +104,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
   const config = {
     apiKey: "AIzaSyDS4_JP8-KBxMph44EGVVHPyOlbNxZsAdE",
@@ -170,6 +174,22 @@
       </div>`).join('');
   };
 
+  window.addNewBrand = () => {
+    const b = prompt("Назва нового бренду:");
+    if(b && !brands.includes(b)) {
+      const newBrands = [...brands, b];
+      set(ref(db, 'brands'), newBrands);
+    }
+  };
+
+  window.addNewCat = () => {
+    const name = prompt("Назва категорії (напр. Ягоди):");
+    const emoji = prompt("Емодзі (напр. 🍓):", "✨");
+    if(name) {
+      update(ref(db, 'categories'), { [name]: emoji });
+    }
+  };
+
   window.openAdd = () => {
     editId = null; base64Img = ""; selectedVol = "30мл"; selectedCats = new Set(['інше']);
     document.getElementById('inName').value = "";
@@ -182,7 +202,8 @@
 
   window.openEdit = (id) => {
     const f = flavors.find(x => x.id === id); openAdd(); editId = id;
-    document.getElementById('inName').value = f.name; document.getElementById('inBrand').value = f.brand;
+    document.getElementById('inName').value = f.name; 
+    setTimeout(() => document.getElementById('inBrand').value = f.brand, 50);
     selectedVol = f.vol || "30мл"; selectedCats = new Set(f.cats || []);
     if(f.img) { base64Img = f.img; document.getElementById('preview').src = f.img; document.getElementById('preview').style.display = 'block'; document.getElementById('pLabel').style.display = 'none'; }
     renderModalVol(); renderModalCats();
