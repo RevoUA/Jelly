@@ -5,25 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Jelly Lab Pro v19</title>
+<title>Jelly Lab Pro v20</title>
 <link rel="apple-touch-icon" href="https://img.icons8.com/emoji/180/test-tube-emoji.png">
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   :root{
-    --bg:#f5f4f0;--card:#fff;--text:#1a1a1a;--muted:#888;--border:#e8e6e0;
-    --accent:#2563eb;--accent-bg:#eff6ff;--accent-text:#1d4ed8;
+    --bg:#141414;--card:#1e1e1e;--text:#f0efeb;--muted:#666;--border:#2a2a2a;
+    --accent:#3b82f6;--accent-bg:#1e3a5f;--accent-text:#93c5fd;
     --radius:14px;--radius-sm:8px;--font:'Manrope',sans-serif;
-  }
-  @media(prefers-color-scheme:dark){
-    :root{--bg:#141414;--card:#1e1e1e;--text:#f0efeb;--muted:#666;--border:#2a2a2a;
-    --accent:#3b82f6;--accent-bg:#1e3a5f;--accent-text:#93c5fd;}
   }
   html,body{height:100%;background:var(--bg);font-family:var(--font);color:var(--text);overflow:hidden;}
   body{display:flex;flex-direction:column;max-width:520px;margin:0 auto;}
   
-  /* HEADER */
   .header{padding:16px 16px 8px;background:var(--bg);z-index:10;}
   .logo{font-size:16px;font-weight:800;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
   .sync-status{font-size:9px; font-weight:800; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:4px;}
@@ -32,7 +27,6 @@
   .search-input{width:100%;padding:10px 40px;font-size:15px;font-family:var(--font);font-weight:500;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;}
   .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none;}
   
-  /* ТЕГИ ТА КАТЕГОРІЇ */
   .tags-wrapper{padding:0 16px 8px; background:var(--bg);}
   .tags-container{display:flex; flex-wrap:wrap; gap:5px; transition: all 0.3s ease;}
   .tag{padding:5px 10px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--card); color:var(--muted); transition:0.2s; white-space:nowrap; display:flex; align-items:center; gap:4px;}
@@ -42,7 +36,6 @@
   .hidden-tags{display:none; width:100%; margin-top:5px; padding-top:5px; border-top:1px dashed var(--border);}
   .hidden-tags.expanded{display:flex; flex-wrap:wrap; gap:5px;}
 
-  /* СПИСОК ТА КАРТКИ */
   .stats-bar{padding:4px 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between;}
   .manage-link{color:var(--accent); cursor:pointer;}
 
@@ -57,7 +50,6 @@
   
   .action-btn{background:none; border:none; font-size:14px; cursor:pointer; padding:4px; color:var(--muted);}
 
-  /* ФОРМИ ТА МОДАЛКИ */
   .fab{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; border:none; padding:14px 28px; border-radius:999px; font-size:14px; font-weight:800; box-shadow:0 8px 20px rgba(37,99,235,.3); z-index:20;}
 
   .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:30; display:none; align-items:flex-end; justify-content:center; backdrop-filter:blur(2px);}
@@ -76,6 +68,9 @@
   .btn-primary{background:var(--accent); color:#fff;}
   .btn-sub{background:var(--bg); color:var(--muted); border:1.5px solid var(--border);}
   
+  .edit-item-row{display:flex; align-items:center; gap:10px; background:var(--bg); padding:8px 12px; border-radius:12px; margin-bottom:8px; border:1px solid var(--border);}
+  .edit-item-row input{flex:1; background:none; border:none; font-family:var(--font); font-weight:700; color:var(--text); font-size:14px; outline:none;}
+
   .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:6px 14px; border-radius:999px; font-size:12px; opacity:0; transition:0.3s; z-index:100; pointer-events:none;}
   .toast.show{opacity:1;}
 </style>
@@ -89,7 +84,7 @@
   </div>
   <div class="search-wrap">
     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="search-input" id="search" type="search" placeholder="Пошук смаку чи бренду..." autocomplete="off">
+    <input class="search-input" id="search" type="search" placeholder="Пошук смаку..." autocomplete="off">
   </div>
 </div>
 
@@ -106,14 +101,14 @@
 <div class="modal-overlay" id="overlay" onclick="if(event.target===this) closeModal()">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h3 id="modalTitle" style="text-align:center; margin-bottom:16px; font-size:16px;">Редагування</h3>
+    <h3 id="modalTitle" style="text-align:center; margin-bottom:16px; font-size:16px;">Додати / Редагувати</h3>
     <input type="hidden" id="editFlavorId">
     
     <span class="label-text">Назва</span>
-    <input class="field-input" id="inName" placeholder="Наприклад: Кавун Айс">
+    <input class="field-input" id="inName" placeholder="Наприклад: Банан Полуниця">
 
     <span class="label-text">Бренд</span>
-    <select class="field-select" id="brandSelect" onchange="if(this.value==='ADD_NEW'){openCatModal(); this.value=localBrands[0];}"></select>
+    <select class="field-select" id="brandSelect" onchange="if(this.value==='ADD_NEW'){openCatModal(); this.value='';}"></select>
 
     <span class="label-text">Категорії</span>
     <div class="horizontal-scroll" id="catGrid"></div>
@@ -128,7 +123,7 @@
 <div class="modal-overlay" id="catOverlay" onclick="if(event.target===this) closeCatModal()">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h3 style="margin-bottom:16px; text-align:center; font-size:16px;">Списки</h3>
+    <h3 style="margin-bottom:16px; text-align:center; font-size:16px;">Налаштування списків</h3>
     
     <span class="label-text">Бренди</span>
     <div id="brandEditList" style="margin-bottom:12px;"></div>
@@ -168,18 +163,17 @@
   
   let localFlavors = [];
   let localCats = {'фрукти':'🍓','цитрус':'🍋','ягоди':'🍇','десерт':'🍰','ментол':'❄️','тютюн':'🌿','напій':'🥤','інше':'✨'};
-  let localBrands = ['Jelly Lab', 'Chaser', 'Liquid Lab'];
+  let localBrands = [];
   let activeFilters = new Set();
   let selectedModalCats = new Set();
   let isCatsExpanded = false;
 
-  // --- ЛОГІКА СИНХРОНІЗАЦІЇ ---
   onValue(ref(db, 'flavors'), (s) => {
     const data = s.val();
     localFlavors = data ? Object.keys(data).map(k => ({id:k, ...data[k]})) : [];
     localFlavors.sort((a,b) => a.name.localeCompare(b.name, 'uk'));
     renderResults();
-    renderTags(); // Перемалювати теги, бо змінилась популярність
+    renderTags();
     document.getElementById('syncDot').style.color = '#10b981';
   });
 
@@ -189,12 +183,11 @@
   });
 
   onValue(ref(db, 'brands'), (s) => {
-    if(s.val()) localBrands = s.val();
+    localBrands = s.val() || [];
     localBrands.sort((a,b) => a.localeCompare(b, 'uk'));
     renderBrandSelect();
   });
 
-  // --- РОЗУМНІ ТЕГИ ---
   window.renderTags = () => {
     const counts = {};
     Object.keys(localCats).forEach(c => counts[c] = 0);
@@ -215,13 +208,11 @@
   };
 
   window.toggleCatsExpand = () => { isCatsExpanded = !isCatsExpanded; renderTags(); };
-
   window.toggleFilter = (c) => {
     activeFilters.has(c) ? activeFilters.delete(c) : activeFilters.add(c);
     renderTags(); renderResults();
   };
 
-  // --- ГОЛОВНИЙ СПИСОК ---
   window.renderResults = () => {
     const q = document.getElementById('search').value.toLowerCase();
     const filtered = localFlavors.filter(f => 
@@ -244,11 +235,12 @@
       </div>`).join('');
   };
 
-  // --- МОДАЛКИ ТА ФОРМИ ---
   window.renderBrandSelect = () => {
     const select = document.getElementById('brandSelect');
-    select.innerHTML = localBrands.map(b => `<option value="${b}">${b}</option>`).join('') + 
-      `<option value="ADD_NEW">+ Додати бренд...</option>`;
+    let html = `<option value="" disabled selected>Оберіть бренд...</option>`;
+    html += localBrands.map(b => `<option value="${b}">${b}</option>`).join('');
+    html += `<option value="ADD_NEW">+ Додати новий бренд...</option>`;
+    select.innerHTML = html;
   };
 
   window.renderCatGridInModal = () => {
@@ -267,7 +259,7 @@
     const name = document.getElementById('inName').value.trim();
     const brand = document.getElementById('brandSelect').value;
     const editId = document.getElementById('editFlavorId').value;
-    if(!name) return;
+    if(!name || !brand) return;
     const data = { name, brand, cats: Array.from(selectedModalCats), ts: Date.now() };
     if(editId) await update(ref(db, `flavors/${editId}`), data);
     else await push(ref(db, 'flavors'), data);
@@ -282,6 +274,13 @@
     document.getElementById('newBrandInput').value = '';
   };
 
+  window.deleteBrand = async (index) => {
+    if(confirm("Видалити бренд?")) {
+      localBrands.splice(index, 1);
+      await set(ref(db, 'brands'), localBrands);
+    }
+  };
+
   window.addNewCategory = async () => {
     const val = document.getElementById('newCatInput').value.trim();
     if(!val) return;
@@ -293,11 +292,17 @@
     document.getElementById('newCatInput').value = '';
   };
 
-  // --- UI HELPERS ---
+  window.deleteCategory = async (n) => { 
+    if(confirm("Видалити категорію?")) {
+        delete localCats[n]; 
+        await set(ref(db, 'categories'), localCats); 
+    }
+  };
+
   window.openModalForAdd = () => {
     document.getElementById('editFlavorId').value = "";
     document.getElementById('inName').value = "";
-    document.getElementById('brandSelect').value = localBrands[0] || "";
+    document.getElementById('brandSelect').value = ""; // Скидаємо бренд
     selectedModalCats = new Set(['інше']);
     document.getElementById('overlay').classList.add('open');
     renderCatGridInModal();
@@ -307,13 +312,12 @@
     const f = localFlavors.find(x => x.id === id);
     document.getElementById('editFlavorId').value = f.id;
     document.getElementById('inName').value = f.name;
-    document.getElementById('brandSelect').value = f.brand || localBrands[0];
+    document.getElementById('brandSelect').value = f.brand || "";
     selectedModalCats = new Set(f.cats || []);
     document.getElementById('overlay').classList.add('open');
     renderCatGridInModal();
   };
 
-  window.deleteFlavor = (id) => { if(confirm("Видалити?")) remove(ref(db, `flavors/${id}`)); };
   window.closeModal = () => document.getElementById('overlay').classList.remove('open');
   window.openCatModal = () => { document.getElementById('catOverlay').classList.add('open'); renderCatEditList(); renderBrandEditList(); };
   window.closeCatModal = () => document.getElementById('catOverlay').classList.remove('open');
@@ -321,7 +325,7 @@
   window.renderBrandEditList = () => {
     document.getElementById('brandEditList').innerHTML = localBrands.map((b, i) => `
       <div class="edit-item-row">
-        <input type="text" value="${b}" onchange="updateBrandName(${i}, this.value)">
+        <input type="text" value="${b}" readonly>
         <button onclick="deleteBrand(${i})" style="border:none;background:none;color:red">🗑</button>
       </div>`).join('');
   };
