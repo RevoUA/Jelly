@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Jelly Lab v42 🪼</title>
+<title>Jelly Lab v43 🪼</title>
 
 <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/jellyfish.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -132,10 +132,7 @@
   const db = getDatabase(app);
 
   let flavors = [], cats = {}, brands = [], activeCat = null, activeVol = null, activeBrand = "", selectedCats = new Set(), selectedVol = "30мл", editId = null, base64Img = "";
-  
-  // КЛЮЧОВЕ ВИПРАВЛЕННЯ: Глобальна змінна для кнопки "Ще"
   window.isExpanded = false;
-
   const volumes = ["10мл", "15мл", "30мл"];
 
   onValue(ref(db, '/'), s => {
@@ -148,18 +145,12 @@
 
   window.toggleCat = (c) => { activeCat = (activeCat === c) ? null : c; render(); renderFilters(); };
   window.toggleVol = (v) => { activeVol = (activeVol === v) ? null : v; render(); renderFilters(); };
-  window.resetAll = () => { 
-    document.getElementById('search').value = ""; 
-    activeCat = null; activeVol = null; activeBrand = ""; 
-    window.isExpanded = false;
-    render(); renderFilters(); 
-  };
+  window.resetAll = () => { document.getElementById('search').value = ""; activeCat = null; activeVol = null; activeBrand = ""; window.isExpanded = false; render(); renderFilters(); };
 
   window.renderFilters = () => {
     const sc = Object.keys(cats).sort();
     let h = '';
     sc.forEach((c, i) => { 
-      // Показуємо перші 3 АБО всі, якщо натиснуто "Ще", АБО якщо категорія вибрана
       if (window.isExpanded || i < 3 || c === activeCat) {
         h += `<div class="tag ${activeCat===c?'active':''}" onclick="toggleCat('${c}')">${cats[c]} ${c}</div>`;
       }
@@ -199,8 +190,19 @@
   window.zoom = (s) => { document.getElementById('zoomImg').src = s; document.getElementById('zoomOverlay').style.display = 'flex'; };
   window.setModalVol = (v) => { selectedVol = v; renderModalVol(); };
   window.renderModalVol = () => { document.getElementById('modalVol').innerHTML = volumes.map(v => `<div class="tag ${selectedVol===v?'active':''}" onclick="setModalVol('${v}')">${v}</div>`).join(''); };
-  window.toggleMC = (c) => { selectedCats.has(c) ? selectedCats.delete(c) : selectedCats.add(c); renderModalCats(); };
-  window.renderModalCats = () => { document.getElementById('modalCats').innerHTML = Object.keys(cats).map(c => `<div class="tag ${selectedCats.has(c)?'active':''}" onclick="toggleMC('${c}')">${cats[c]} ${c}</div>`).join(''); };
+  
+  // ВИПРАВЛЕНО: Мультиселект категорій (Set)
+  window.toggleMC = (c) => { 
+    if(selectedCats.has(c)) selectedCats.delete(c); 
+    else selectedCats.add(c); 
+    renderModalCats(); 
+  };
+  
+  window.renderModalCats = () => { 
+    document.getElementById('modalCats').innerHTML = Object.keys(cats).map(c => 
+      `<div class="tag ${selectedCats.has(c)?'active':''}" onclick="toggleMC('${c}')">${cats[c]} ${c}</div>`
+    ).join(''); 
+  };
 
   window.openAdd = () => {
     editId = null; base64Img = ""; selectedVol = "30мл"; selectedCats = new Set(['інше']);
