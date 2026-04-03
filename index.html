@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Jelly Lab v43 🪼</title>
+<title>Jelly Lab v45 🪼</title>
 
 <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/jellyfish.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -131,8 +131,13 @@
   const app = initializeApp(config);
   const db = getDatabase(app);
 
-  let flavors = [], cats = {}, brands = [], activeCat = null, activeVol = null, activeBrand = "", selectedCats = new Set(), selectedVol = "30мл", editId = null, base64Img = "";
+  let flavors = [], cats = {}, brands = [], activeCat = null, activeVol = null, activeBrand = "", editId = null, base64Img = "";
+  
+  // КЛЮЧОВЕ: Глобальні стейти для вибору в модалці
+  window.selectedCats = new Set();
+  window.selectedVol = "30мл";
   window.isExpanded = false;
+
   const volumes = ["10мл", "15мл", "30мл"];
 
   onValue(ref(db, '/'), s => {
@@ -188,24 +193,23 @@
   };
 
   window.zoom = (s) => { document.getElementById('zoomImg').src = s; document.getElementById('zoomOverlay').style.display = 'flex'; };
-  window.setModalVol = (v) => { selectedVol = v; renderModalVol(); };
-  window.renderModalVol = () => { document.getElementById('modalVol').innerHTML = volumes.map(v => `<div class="tag ${selectedVol===v?'active':''}" onclick="setModalVol('${v}')">${v}</div>`).join(''); };
-  
-  // ВИПРАВЛЕНО: Мультиселект категорій (Set)
+
+  // ЛОГІКА МОДАЛКИ
   window.toggleMC = (c) => { 
-    if(selectedCats.has(c)) selectedCats.delete(c); 
-    else selectedCats.add(c); 
+    if(window.selectedCats.has(c)) window.selectedCats.delete(c); 
+    else window.selectedCats.add(c); 
     renderModalCats(); 
   };
-  
   window.renderModalCats = () => { 
     document.getElementById('modalCats').innerHTML = Object.keys(cats).map(c => 
-      `<div class="tag ${selectedCats.has(c)?'active':''}" onclick="toggleMC('${c}')">${cats[c]} ${c}</div>`
+      `<div class="tag ${window.selectedCats.has(c)?'active':''}" onclick="toggleMC('${c}')">${cats[c]} ${c}</div>`
     ).join(''); 
   };
+  window.setModalVol = (v) => { window.selectedVol = v; renderModalVol(); };
+  window.renderModalVol = () => { document.getElementById('modalVol').innerHTML = volumes.map(v => `<div class="tag ${window.selectedVol===v?'active':''}" onclick="setModalVol('${v}')">${v}</div>`).join(''); };
 
   window.openAdd = () => {
-    editId = null; base64Img = ""; selectedVol = "30мл"; selectedCats = new Set(['інше']);
+    editId = null; base64Img = ""; window.selectedVol = "30мл"; window.selectedCats = new Set(['інше']);
     document.getElementById('inName').value = ""; 
     document.getElementById('preview').style.display = 'none'; 
     document.getElementById('pLabel').style.display = 'block';
@@ -215,20 +219,22 @@
   };
 
   window.openEdit = (id) => {
-    const f = flavors.find(x => x.id === id); openAdd(); editId = id;
+    const f = flavors.find(x => x.id === id); 
+    editId = id; base64Img = f.img || ""; window.selectedVol = f.vol || "30мл";
+    window.selectedCats = new Set(f.cats || []); // ПРИМУСОВИЙ SET ДЛЯ МУЛЬТИСЕЛЕКТУ
     document.getElementById('inName').value = f.name;
-    setTimeout(() => { document.getElementById('inBrand').value = f.brand || ""; }, 50);
-    selectedVol = f.vol || "30мл"; selectedCats = new Set(f.cats || []);
-    if(f.img) { base64Img = f.img; document.getElementById('preview').src = f.img; document.getElementById('preview').style.display = 'block'; document.getElementById('pLabel').style.display = 'none'; }
+    document.getElementById('inBrand').innerHTML = `<option value="">Оберіть бренд</option>` + brands.map(b=>`<option value="${b}" ${f.brand===b?'selected':''}>${b}</option>`).join('');
+    if(f.img) { document.getElementById('preview').src = f.img; document.getElementById('preview').style.display = 'block'; document.getElementById('pLabel').style.display = 'none'; }
+    else { document.getElementById('preview').style.display = 'none'; document.getElementById('pLabel').style.display = 'block'; }
     renderModalVol(); renderModalCats();
+    document.getElementById('modal').classList.add('open');
   };
 
   window.save = async () => {
     const n = document.getElementById('inName').value.trim();
     const b = document.getElementById('inBrand').value;
-    if(!n) return alert("Введіть назву!");
-    if(!b) return alert("Оберіть бренд!");
-    const d = { name:n, brand:b, vol:selectedVol, img:base64Img, cats:Array.from(selectedCats), ts:Date.now() };
+    if(!n || !b) return alert("Заповніть назву та бренд!");
+    const d = { name:n, brand:b, vol:window.selectedVol, img:base64Img, cats:Array.from(window.selectedCats), ts:Date.now() };
     if(editId) await update(ref(db, `flavors/${editId}`), d);
     else await push(ref(db, 'flavors'), d);
     closeAdd();
