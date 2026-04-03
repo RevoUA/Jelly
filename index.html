@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Jelly Lab Pro v18</title>
+<title>Jelly Lab Pro v19</title>
 <link rel="apple-touch-icon" href="https://img.icons8.com/emoji/180/test-tube-emoji.png">
 
 <style>
@@ -14,7 +14,7 @@
   :root{
     --bg:#f5f4f0;--card:#fff;--text:#1a1a1a;--muted:#888;--border:#e8e6e0;
     --accent:#2563eb;--accent-bg:#eff6ff;--accent-text:#1d4ed8;
-    --radius:14px;--radius-sm:9px;--font:'Manrope',sans-serif;
+    --radius:14px;--radius-sm:8px;--font:'Manrope',sans-serif;
   }
   @media(prefers-color-scheme:dark){
     :root{--bg:#141414;--card:#1e1e1e;--text:#f0efeb;--muted:#666;--border:#2a2a2a;
@@ -22,60 +22,61 @@
   }
   html,body{height:100%;background:var(--bg);font-family:var(--font);color:var(--text);overflow:hidden;}
   body{display:flex;flex-direction:column;max-width:520px;margin:0 auto;}
-  .header{padding:20px 16px 12px;background:var(--bg);z-index:10;}
-  .logo{font-size:18px;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
-  .sync-status{font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:4px;}
-  .sync-online{color:#10b981;}
   
-  .search-wrap{position:relative;}
-  .search-input{width:100%;padding:13px 44px;font-size:16px;font-family:var(--font);font-weight:500;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;}
-  .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);pointer-events:none;}
+  /* HEADER */
+  .header{padding:16px 16px 8px;background:var(--bg);z-index:10;}
+  .logo{font-size:16px;font-weight:800;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+  .sync-status{font-size:9px; font-weight:800; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:4px;}
   
-  .tags-container{padding:4px 16px 10px; display:flex; gap:6px; background:var(--bg); overflow-x:auto; scrollbar-width:none;}
-  .tags-container::-webkit-scrollbar{display:none;}
-  .tag{padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; border:1.5px solid var(--border); background:var(--card); color:var(--muted); transition:0.2s; white-space:nowrap;}
+  .search-wrap{position:relative; margin-bottom:12px;}
+  .search-input{width:100%;padding:10px 40px;font-size:15px;font-family:var(--font);font-weight:500;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none;}
+  
+  /* ТЕГИ ТА КАТЕГОРІЇ */
+  .tags-wrapper{padding:0 16px 8px; background:var(--bg);}
+  .tags-container{display:flex; flex-wrap:wrap; gap:5px; transition: all 0.3s ease;}
+  .tag{padding:5px 10px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--card); color:var(--muted); transition:0.2s; white-space:nowrap; display:flex; align-items:center; gap:4px;}
   .tag.active{background:var(--accent-bg); border-color:var(--accent); color:var(--accent-text);}
+  .tag.more-btn{background:var(--bg); border-style:dashed; color:var(--accent);}
   
-  .stats-bar{padding:4px 16px 8px; font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between;}
-  .manage-link{color:var(--accent); cursor:pointer; text-decoration:underline;}
+  .hidden-tags{display:none; width:100%; margin-top:5px; padding-top:5px; border-top:1px dashed var(--border);}
+  .hidden-tags.expanded{display:flex; flex-wrap:wrap; gap:5px;}
+
+  /* СПИСОК ТА КАРТКИ */
+  .stats-bar{padding:4px 16px 8px; font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between;}
+  .manage-link{color:var(--accent); cursor:pointer;}
 
   .results{flex:1; overflow-y:auto; padding:0 16px 120px;}
-  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; display:flex; align-items:flex-start; gap:12px; margin-bottom:8px;}
-  .card-icon-wrap{display:flex; gap:2px; flex-wrap:wrap; width:42px; font-size:18px; justify-content:center;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:12px; display:flex; align-items:flex-start; gap:10px; margin-bottom:8px;}
+  .card-icon-wrap{display:flex; gap:2px; flex-wrap:wrap; width:36px; font-size:16px; justify-content:center;}
   .card-body{flex:1; min-width:0;}
-  .card-name{font-size:15px; font-weight:700;}
-  .card-brand{font-size:11px; color:var(--accent); font-weight:800; text-transform:uppercase; margin-bottom:4px;}
-  .badge-list{display:flex; flex-wrap:wrap; gap:4px;}
-  .badge{font-size:9px; font-weight:800; padding:2px 6px; border-radius:4px; background:var(--accent-bg); color:var(--accent-text); text-transform:uppercase;}
+  .card-name{font-size:14px; font-weight:700;}
+  .card-brand{font-size:10px; color:var(--accent); font-weight:800; text-transform:uppercase; margin-bottom:2px;}
+  .badge-list{display:flex; flex-wrap:wrap; gap:3px; margin-top:4px;}
+  .badge{font-size:8px; font-weight:800; padding:1px 5px; border-radius:4px; background:var(--accent-bg); color:var(--accent-text); text-transform:uppercase;}
   
-  .card-right{display:flex; flex-direction:column; align-items:flex-end; gap:10px;}
-  .action-btn{background:none; border:none; font-size:16px; cursor:pointer; padding:4px; color:var(--muted);}
+  .action-btn{background:none; border:none; font-size:14px; cursor:pointer; padding:4px; color:var(--muted);}
 
-  .fab{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; border:none; padding:15px 30px; border-radius:999px; font-size:15px; font-weight:800; box-shadow:0 8px 20px rgba(37,99,235,.3); z-index:20;}
+  /* ФОРМИ ТА МОДАЛКИ */
+  .fab{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; border:none; padding:14px 28px; border-radius:999px; font-size:14px; font-weight:800; box-shadow:0 8px 20px rgba(37,99,235,.3); z-index:20;}
 
   .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:30; display:none; align-items:flex-end; justify-content:center; backdrop-filter:blur(2px);}
   .modal-overlay.open{display:flex;}
-  .modal{background:var(--card); border-radius:24px 24px 0 0; width:100%; max-width:520px; padding:20px; max-height:90vh; overflow-y:auto;}
-  .modal-handle{width:40px; height:5px; background:var(--border); border-radius:3px; margin:0 auto 20px;}
+  .modal{background:var(--card); border-radius:20px 20px 0 0; width:100%; max-width:520px; padding:20px; max-height:90vh; overflow-y:auto;}
+  .modal-handle{width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px;}
   
-  .label-text{font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; margin-bottom:8px; display:block; letter-spacing:0.5px;}
-  .field-input, .field-select{width:100%; padding:14px; font-size:16px; font-family:var(--font); margin-bottom:20px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); outline:none; appearance:none;}
+  .label-text{font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; margin-bottom:6px; display:block;}
+  .field-input, .field-select{width:100%; padding:12px; font-size:16px; font-family:var(--font); margin-bottom:16px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); outline:none; appearance:none;}
   
-  .horizontal-scroll{display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:20px; scrollbar-width:none;}
+  .horizontal-scroll{display:flex; gap:6px; overflow-x:auto; padding-bottom:10px; margin-bottom:16px; scrollbar-width:none;}
   .horizontal-scroll::-webkit-scrollbar{display:none;}
   
-  .choice-pill{padding:10px 18px; border-radius:12px; font-size:14px; font-weight:700; border:1.5px solid var(--border); cursor:pointer; white-space:nowrap; background:var(--card); transition: 0.2s;}
-  .choice-pill.selected{background:var(--accent-bg); border-color:var(--accent); color:var(--accent-text);}
-
-  .btn-row{display:flex; gap:10px; margin-bottom:10px;}
-  .btn{flex:1; padding:15px; border-radius:var(--radius-sm); border:none; font-weight:700; cursor:pointer;}
+  .btn-row{display:flex; gap:8px;}
+  .btn{flex:1; padding:14px; border-radius:var(--radius-sm); border:none; font-weight:700; cursor:pointer;}
   .btn-primary{background:var(--accent); color:#fff;}
   .btn-sub{background:var(--bg); color:var(--muted); border:1.5px solid var(--border);}
   
-  .edit-item-row{display:flex; align-items:center; gap:10px; background:var(--bg); padding:8px 12px; border-radius:12px; margin-bottom:8px; border:1px solid var(--border);}
-  .edit-item-row input{flex:1; background:none; border:none; font-family:var(--font); font-weight:700; color:var(--text); font-size:14px; outline:none;}
-
-  .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:8px 16px; border-radius:999px; font-size:13px; opacity:0; transition:0.3s; z-index:100; pointer-events:none;}
+  .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:6px 14px; border-radius:999px; font-size:12px; opacity:0; transition:0.3s; z-index:100; pointer-events:none;}
   .toast.show{opacity:1;}
 </style>
 </head>
@@ -84,27 +85,31 @@
 <div class="header">
   <div class="logo">
     <span>🧪 Jelly Lab Pro</span>
-    <div class="sync-status"><span>Cloud Sync</span> <span id="syncDot">●</span></div>
+    <div class="sync-status"><span>Online</span> <span id="syncDot">●</span></div>
   </div>
   <div class="search-wrap">
     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="search-input" id="search" type="search" placeholder="Пошук смаку..." autocomplete="off">
+    <input class="search-input" id="search" type="search" placeholder="Пошук смаку чи бренду..." autocomplete="off">
   </div>
 </div>
 
-<div class="tags-container" id="tagRow"></div>
+<div class="tags-wrapper">
+  <div class="tags-container" id="tagRow"></div>
+  <div class="hidden-tags" id="hiddenTags"></div>
+</div>
+
 <div class="stats-bar"><span id="statsCount">0 смаків</span><span class="manage-link" onclick="openCatModal()">⚙ Налаштування</span></div>
 <div class="results" id="results"></div>
 
-<button class="fab" onclick="openModalForAdd()">➕ Додати смак</button>
+<button class="fab" onclick="openModalForAdd()">➕ Новий смак</button>
 
 <div class="modal-overlay" id="overlay" onclick="if(event.target===this) closeModal()">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h3 id="modalTitle" style="text-align:center; margin-bottom:20px;">Смак</h3>
+    <h3 id="modalTitle" style="text-align:center; margin-bottom:16px; font-size:16px;">Редагування</h3>
     <input type="hidden" id="editFlavorId">
     
-    <span class="label-text">Назва смаку</span>
+    <span class="label-text">Назва</span>
     <input class="field-input" id="inName" placeholder="Наприклад: Кавун Айс">
 
     <span class="label-text">Бренд</span>
@@ -123,22 +128,21 @@
 <div class="modal-overlay" id="catOverlay" onclick="if(event.target===this) closeCatModal()">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h3 style="margin-bottom:20px; text-align:center;">Керування списками</h3>
+    <h3 style="margin-bottom:16px; text-align:center; font-size:16px;">Списки</h3>
     
-    <span class="label-text">Бренди (А-Я)</span>
+    <span class="label-text">Бренди</span>
     <div id="brandEditList" style="margin-bottom:12px;"></div>
-    <div style="display:flex; gap:8px; margin-bottom:24px;">
-        <input class="field-input" style="margin-bottom:0" id="newBrandInput" placeholder="Новий бренд">
-        <button class="btn btn-primary" style="padding:0 20px" onclick="addNewBrand()">+</button>
+    <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <input class="field-input" style="margin-bottom:0" id="newBrandInput" placeholder="Додати бренд">
+        <button class="btn btn-primary" style="padding:0 15px" onclick="addNewBrand()">+</button>
     </div>
 
-    <span class="label-text">Категорії (А-Я)</span>
+    <span class="label-text">Категорії</span>
     <div id="catEditList" style="margin-bottom:12px;"></div>
-    <div style="display:flex; gap:8px; margin-bottom:20px;">
+    <div style="display:flex; gap:8px; margin-bottom:16px;">
         <input class="field-input" style="margin-bottom:0" id="newCatInput" placeholder="🍎 Фрукти">
-        <button class="btn btn-primary" style="padding:0 20px" onclick="addNewCategory()">+</button>
+        <button class="btn btn-primary" style="padding:0 15px" onclick="addNewCategory()">+</button>
     </div>
-    
     <button class="btn btn-sub" style="width:100%" onclick="closeCatModal()">Готово</button>
   </div>
 </div>
@@ -165,44 +169,59 @@
   let localFlavors = [];
   let localCats = {'фрукти':'🍓','цитрус':'🍋','ягоди':'🍇','десерт':'🍰','ментол':'❄️','тютюн':'🌿','напій':'🥤','інше':'✨'};
   let localBrands = ['Jelly Lab', 'Chaser', 'Liquid Lab'];
-  
   let activeFilters = new Set();
   let selectedModalCats = new Set();
+  let isCatsExpanded = false;
 
-  // --- СИНХРОНІЗАЦІЯ ---
+  // --- ЛОГІКА СИНХРОНІЗАЦІЇ ---
   onValue(ref(db, 'flavors'), (s) => {
     const data = s.val();
     localFlavors = data ? Object.keys(data).map(k => ({id:k, ...data[k]})) : [];
-    // Сортування А-Я за назвою смаку
     localFlavors.sort((a,b) => a.name.localeCompare(b.name, 'uk'));
     renderResults();
+    renderTags(); // Перемалювати теги, бо змінилась популярність
     document.getElementById('syncDot').style.color = '#10b981';
   });
 
   onValue(ref(db, 'categories'), (s) => {
     if(s.val()) localCats = s.val();
     renderTags();
-    if(document.getElementById('catOverlay').classList.contains('open')) renderCatEditList();
   });
 
   onValue(ref(db, 'brands'), (s) => {
     if(s.val()) localBrands = s.val();
-    // Сортування брендів А-Я
     localBrands.sort((a,b) => a.localeCompare(b, 'uk'));
     renderBrandSelect();
-    if(document.getElementById('catOverlay').classList.contains('open')) renderBrandEditList();
   });
 
-  // --- ВІДОБРАЖЕННЯ ---
-  window.getIcon = (c) => localCats[c.toLowerCase()] || '✨';
-
+  // --- РОЗУМНІ ТЕГИ ---
   window.renderTags = () => {
-    const sortedCatNames = Object.keys(localCats).sort((a,b) => a.localeCompare(b, 'uk'));
-    document.getElementById('tagRow').innerHTML = sortedCatNames.map(c => 
-      `<span class="tag ${activeFilters.has(c)?'active':''}" onclick="toggleFilter('${c}')">${getIcon(c)} ${c}</span>`
-    ).join('');
+    const counts = {};
+    Object.keys(localCats).forEach(c => counts[c] = 0);
+    localFlavors.forEach(f => (f.cats || []).forEach(c => { if(counts[c] !== undefined) counts[c]++; }));
+
+    const sortedNames = Object.keys(localCats).sort((a,b) => (counts[b] - counts[a]) || a.localeCompare(b, 'uk'));
+    const top5 = sortedNames.slice(0, 5);
+    const rest = sortedNames.slice(5);
+
+    const tagHtml = (name) => `<span class="tag ${activeFilters.has(name)?'active':''}" onclick="toggleFilter('${name}')">${localCats[name]} ${name}</span>`;
+
+    document.getElementById('tagRow').innerHTML = top5.map(tagHtml).join('') + 
+      (rest.length > 0 ? `<span class="tag more-btn" onclick="toggleCatsExpand()">${isCatsExpanded ? 'Згорнути ▲' : 'Ще ▼'}</span>` : '');
+    
+    const hiddenWrap = document.getElementById('hiddenTags');
+    hiddenWrap.innerHTML = rest.sort((a,b) => a.localeCompare(b, 'uk')).map(tagHtml).join('');
+    hiddenWrap.className = isCatsExpanded ? 'hidden-tags expanded' : 'hidden-tags';
   };
 
+  window.toggleCatsExpand = () => { isCatsExpanded = !isCatsExpanded; renderTags(); };
+
+  window.toggleFilter = (c) => {
+    activeFilters.has(c) ? activeFilters.delete(c) : activeFilters.add(c);
+    renderTags(); renderResults();
+  };
+
+  // --- ГОЛОВНИЙ СПИСОК ---
   window.renderResults = () => {
     const q = document.getElementById('search').value.toLowerCase();
     const filtered = localFlavors.filter(f => 
@@ -212,39 +231,33 @@
     document.getElementById('statsCount').textContent = `${filtered.length} смаків`;
     document.getElementById('results').innerHTML = filtered.map(f => `
       <div class="card">
-        <div class="card-icon-wrap">${f.cats.map(c => getIcon(c)).join('')}</div>
+        <div class="card-icon-wrap">${(f.cats || []).map(c => localCats[c] || '✨').join('')}</div>
         <div class="card-body">
           <div class="card-brand">${f.brand || 'No Brand'}</div>
           <div class="card-name">${f.name}</div>
-          <div class="badge-list">${f.cats.map(c => `<span class="badge">${getIcon(c)} ${c}</span>`).join('')}</div>
+          <div class="badge-list">${(f.cats || []).map(c => `<span class="badge">${localCats[c]||'✨'} ${c}</span>`).join('')}</div>
         </div>
-        <div class="card-right">
+        <div class="card-right" style="display:flex; flex-direction:column; gap:8px;">
           <button class="action-btn" onclick="openModalForEdit('${f.id}')">✏️</button>
           <button class="action-btn" onclick="deleteFlavor('${f.id}')">🗑</button>
         </div>
       </div>`).join('');
   };
 
-  window.toggleFilter = (c) => {
-    activeFilters.has(c) ? activeFilters.delete(c) : activeFilters.add(c);
-    renderTags(); renderResults();
-  };
-
-  // --- МОДАЛКА СМАКУ ---
+  // --- МОДАЛКИ ТА ФОРМИ ---
   window.renderBrandSelect = () => {
     const select = document.getElementById('brandSelect');
-    let html = localBrands.map(b => `<option value="${b}">${b}</option>`).join('');
-    html += `<option value="ADD_NEW" style="color:var(--accent); font-weight:bold;">+ Додати новий бренд...</option>`;
-    select.innerHTML = html;
+    select.innerHTML = localBrands.map(b => `<option value="${b}">${b}</option>`).join('') + 
+      `<option value="ADD_NEW">+ Додати бренд...</option>`;
   };
 
   window.renderCatGridInModal = () => {
-    const sortedCats = Object.keys(localCats).sort((a,b) => a.localeCompare(b, 'uk'));
-    document.getElementById('catGrid').innerHTML = sortedCats.map(c => 
-      `<div class="choice-pill ${selectedModalCats.has(c)?'selected':''}" onclick="toggleModalCat('${c}')">${getIcon(c)} ${c}</div>`
+    const sorted = Object.keys(localCats).sort((a,b) => a.localeCompare(b, 'uk'));
+    document.getElementById('catGrid').innerHTML = sorted.map(c => 
+      `<div class="tag ${selectedModalCats.has(c)?'active':''}" style="font-size:13px; padding:8px 12px;" onclick="toggleModalCat('${c}')">${localCats[c]} ${c}</div>`
     ).join('');
   };
-  
+
   window.toggleModalCat = (c) => {
     selectedModalCats.has(c) ? selectedModalCats.delete(c) : selectedModalCats.add(c);
     renderCatGridInModal();
@@ -254,38 +267,19 @@
     const name = document.getElementById('inName').value.trim();
     const brand = document.getElementById('brandSelect').value;
     const editId = document.getElementById('editFlavorId').value;
-    if(!name) return showToast("Введіть назву");
-    
+    if(!name) return;
     const data = { name, brand, cats: Array.from(selectedModalCats), ts: Date.now() };
     if(editId) await update(ref(db, `flavors/${editId}`), data);
     else await push(ref(db, 'flavors'), data);
     closeModal();
   };
 
-  // --- КЕРУВАННЯ СПИСКАМИ ---
   window.addNewBrand = async () => {
     const val = document.getElementById('newBrandInput').value.trim();
-    if(!val || localBrands.includes(val)) return;
+    if(!val) return;
     localBrands.push(val);
     await set(ref(db, 'brands'), localBrands);
     document.getElementById('newBrandInput').value = '';
-  };
-
-  window.updateBrandName = async (index, newVal) => {
-    if(!newVal.trim()) return;
-    const oldVal = localBrands[index];
-    localBrands[index] = newVal.trim();
-    await set(ref(db, 'brands'), localBrands);
-    localFlavors.forEach(async f => {
-        if(f.brand === oldVal) await update(ref(db, `flavors/${f.id}`), {brand: newVal.trim()});
-    });
-  };
-
-  window.deleteBrand = async (index) => {
-    if(confirm("Видалити цей бренд всюди?")) {
-        localBrands.splice(index, 1);
-        await set(ref(db, 'brands'), localBrands);
-    }
   };
 
   window.addNewCategory = async () => {
@@ -299,32 +293,7 @@
     document.getElementById('newCatInput').value = '';
   };
 
-  window.deleteCategory = async (n) => { 
-    if(confirm("Видалити категорію?")) {
-        delete localCats[n]; 
-        await set(ref(db, 'categories'), localCats); 
-    }
-  };
-
-  window.renderBrandEditList = () => {
-    document.getElementById('brandEditList').innerHTML = localBrands.map((b, i) => `
-      <div class="edit-item-row">
-        <input type="text" value="${b}" onchange="updateBrandName(${i}, this.value)">
-        <button onclick="deleteBrand(${i})" style="border:none;background:none;color:red;font-size:14px;">🗑</button>
-      </div>`).join('');
-  };
-
-  window.renderCatEditList = () => {
-    const sortedCats = Object.entries(localCats).sort((a,b) => a[0].localeCompare(b[0], 'uk'));
-    document.getElementById('catEditList').innerHTML = sortedCats.map(([n, i]) => `
-      <div class="edit-item-row">
-        <span style="font-size:18px; margin-right:8px;">${i}</span>
-        <input type="text" value="${n}" readonly>
-        <button onclick="deleteCategory('${n}')" style="border:none;background:none;color:red;font-size:14px;">🗑</button>
-      </div>`).join('');
-  };
-
-  // --- UI ---
+  // --- UI HELPERS ---
   window.openModalForAdd = () => {
     document.getElementById('editFlavorId').value = "";
     document.getElementById('inName').value = "";
@@ -339,17 +308,33 @@
     document.getElementById('editFlavorId').value = f.id;
     document.getElementById('inName').value = f.name;
     document.getElementById('brandSelect').value = f.brand || localBrands[0];
-    selectedModalCats = new Set(f.cats);
+    selectedModalCats = new Set(f.cats || []);
     document.getElementById('overlay').classList.add('open');
     renderCatGridInModal();
   };
 
-  window.deleteFlavor = (id) => { if(confirm("Видалити смак?")) remove(ref(db, `flavors/${id}`)); };
+  window.deleteFlavor = (id) => { if(confirm("Видалити?")) remove(ref(db, `flavors/${id}`)); };
   window.closeModal = () => document.getElementById('overlay').classList.remove('open');
   window.openCatModal = () => { document.getElementById('catOverlay').classList.add('open'); renderCatEditList(); renderBrandEditList(); };
-  window.closeCatModal = () => { document.getElementById('catOverlay').classList.remove('open'); };
-  window.showToast = (m) => { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); };
-  
+  window.closeCatModal = () => document.getElementById('catOverlay').classList.remove('open');
+
+  window.renderBrandEditList = () => {
+    document.getElementById('brandEditList').innerHTML = localBrands.map((b, i) => `
+      <div class="edit-item-row">
+        <input type="text" value="${b}" onchange="updateBrandName(${i}, this.value)">
+        <button onclick="deleteBrand(${i})" style="border:none;background:none;color:red">🗑</button>
+      </div>`).join('');
+  };
+
+  window.renderCatEditList = () => {
+    const sorted = Object.entries(localCats).sort((a,b) => a[0].localeCompare(b[0], 'uk'));
+    document.getElementById('catEditList').innerHTML = sorted.map(([n, i]) => `
+      <div class="edit-item-row">
+        <span>${i} ${n}</span>
+        <button onclick="deleteCategory('${n}')" style="border:none;background:none;color:red">🗑</button>
+      </div>`).join('');
+  };
+
   document.getElementById('search').oninput = renderResults;
   renderTags(); renderResults();
 </script>
