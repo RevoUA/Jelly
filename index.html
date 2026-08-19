@@ -61,7 +61,68 @@
   .manage-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;border:1px solid var(--border);}
 </style>
 </head>
+</div>
 <body>
+
+  <div id="loginScreen" style="
+  position:fixed;
+  inset:0;
+  background:#141414;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+">
+  <div style="
+    width:100%;
+    max-width:380px;
+    background:#1e1e1e;
+    border:1px solid #2a2a2a;
+    border-radius:20px;
+    padding:28px;
+  ">
+    <div style="text-align:center;font-size:28px;margin-bottom:8px;">🪼</div>
+
+    <div style="
+      text-align:center;
+      font-size:22px;
+      font-weight:800;
+      margin-bottom:24px;
+    ">Jelly Lab</div>
+
+    <input
+      id="loginEmail"
+      type="email"
+      placeholder="Email"
+      class="field"
+      autocomplete="username"
+    >
+
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="Пароль"
+      class="field"
+      autocomplete="current-password"
+      onkeydown="if(event.key==='Enter') login()"
+    >
+
+    <div id="loginError" style="
+      color:#ef4444;
+      font-size:12px;
+      text-align:center;
+      min-height:18px;
+      margin-bottom:8px;
+    "></div>
+
+    <button class="save-btn" onclick="login()">
+      Увійти
+    </button>
+  </div>
+</div>
+
+<div id="appContent">
 
 <div class="header">
   <div class="top-bar">
@@ -120,6 +181,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const config = {
     apiKey: "AIzaSyDS4_JP8-KBxMph44EGVVHPyOlbNxZsAdE",
@@ -130,6 +192,48 @@
 
   const app = initializeApp(config);
   const db = getDatabase(app);
+  const auth = getAuth(app);
+let databaseStarted = false;
+
+window.login = async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!email || !password) {
+    document.getElementById('loginError').textContent = 'Введіть email та пароль';
+    return;
+  }
+
+  try {
+    document.getElementById('loginError').textContent = '';
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error(error);
+    document.getElementById('loginError').textContent = 'Невірний email або пароль';
+  }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, user => {
+  const loginScreen = document.getElementById('loginScreen');
+  const appContent = document.getElementById('appContent');
+
+  if (user) {
+    loginScreen.style.display = 'none';
+    appContent.style.display = 'block';
+
+    if (!databaseStarted) {
+      databaseStarted = true;
+      startDatabase();
+    }
+  } else {
+    loginScreen.style.display = 'flex';
+    appContent.style.display = 'none';
+  }
+});
 
   // activeCats тепер Set — підтримує мультивибір
   let flavors = [], cats = {}, brands = [], activeCats = new Set(), activeVol = null, editId = null, base64Img = "";
@@ -141,13 +245,21 @@
 
   const volumes = ["10мл", "15мл", "30мл"];
 
+  function startDatabase() {
   onValue(ref(db, '/'), s => {
     const d = s.val() || {};
-    flavors = d.flavors ? Object.entries(d.flavors).map(([id,v])=>({id,...v})) : [];
+
+    flavors = d.flavors
+      ? Object.entries(d.flavors).map(([id,v]) => ({id,...v}))
+      : [];
+
     cats = d.categories || {'інше':'✨'};
     brands = (d.brands || []).sort();
-    render(); renderFilters();
+
+    render();
+    renderFilters();
   });
+}
 
   // мультивибір: тап додає або знімає категорію
   window.toggleCat = (c) => {
