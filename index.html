@@ -61,7 +61,6 @@
   .manage-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;border:1px solid var(--border);}
 </style>
 </head>
-</div>
 <body>
 
   <div id="loginScreen" style="
@@ -127,7 +126,12 @@
 <div class="header">
   <div class="top-bar">
     <div class="app-title">🪼 Jelly Lab</div>
-    <div class="sync-status">Cloud Sync <div class="dot"></div></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="userEmail" style="font-size:9px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+      <button id="usersBtn" onclick="openUsers()" style="display:none;background:none;border:0;color:var(--accent);font-size:16px;cursor:pointer;" title="Користувачі">👥</button>
+      <button onclick="logout()" style="background:none;border:0;color:var(--muted);font-size:11px;cursor:pointer;">Вийти</button>
+      <div class="sync-status">Cloud Sync <div class="dot"></div></div>
+    </div>
   </div>
 </div>
 <div class="search-row">
@@ -170,6 +174,24 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="usersModal" style="z-index:120;" onclick="if(event.target===this) this.classList.remove('open')">
+  <div class="modal" style="height:70vh;">
+    <div class="section-label">Користувачі <span class="manage-btn" onclick="closeUsers()">✕</span></div>
+
+    <div class="section-label">UID користувача</div>
+    <input id="viewerUid" class="field" placeholder="Встав UID з Firebase Authentication">
+
+    <button class="save-btn" onclick="addViewer()">Додати як переглядача</button>
+
+    <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px;">
+      Створи користувача в Firebase Authentication → Users, скопіюй його UID і встав сюди.
+      Переглядач зможе тільки дивитися каталог, шукати та фільтрувати.
+    </div>
+
+    <div id="usersList" style="margin-top:20px;"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="manageModal" style="z-index:110;" onclick="if(event.target===this) this.classList.remove('open')">
   <div class="modal" style="height:80vh;">
     <div class="section-label" id="manageTitle"></div>
@@ -180,7 +202,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getDatabase, ref, onValue, push, remove, update, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const config = {
@@ -193,47 +215,182 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from
   const app = initializeApp(config);
   const db = getDatabase(app);
   const auth = getAuth(app);
-let databaseStarted = false;
 
-window.login = async () => {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
+  // Твій UID адміністратора
+  const ADMIN_UID = "P3lWomtTmjbgwiGGmjTOIwlIYDk1";
 
-  if (!email || !password) {
-    document.getElementById('loginError').textContent = 'Введіть email та пароль';
-    return;
-  }
+  let databaseStarted = false;
+  let currentRole = null;
+  let currentUser = null;
 
-  try {
-    document.getElementById('loginError').textContent = '';
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    console.error(error);
-    document.getElementById('loginError').textContent = 'Невірний email або пароль';
-  }
-};
+  window.login = async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
 
-window.logout = async () => {
-  await signOut(auth);
-};
-
-onAuthStateChanged(auth, user => {
-  const loginScreen = document.getElementById('loginScreen');
-  const appContent = document.getElementById('appContent');
-
-  if (user) {
-    loginScreen.style.display = 'none';
-    appContent.style.display = 'block';
-
-    if (!databaseStarted) {
-      databaseStarted = true;
-      startDatabase();
+    if (!email || !password) {
+      document.getElementById('loginError').textContent = 'Введіть email та пароль';
+      return;
     }
-  } else {
-    loginScreen.style.display = 'flex';
-    appContent.style.display = 'none';
+
+    try {
+      document.getElementById('loginError').textContent = '';
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error(error);
+      document.getElementById('loginError').textContent = 'Невірний email або пароль';
+    }
+  };
+
+  window.logout = async () => {
+    await signOut(auth);
+  };
+
+  async function loadUserRole(user) {
+    // Адмін визначається за UID. Одночасно записуємо його роль у БД.
+    if (user.uid === ADMIN_UID) {
+      await set(ref(db, `users/${user.uid}/role`), 'admin');
+      return 'admin';
+    }
+
+    const snap = await get(ref(db, `users/${user.uid}/role`));
+    return snap.exists() ? snap.val() : null;
   }
-});
+
+  function applyPermissions() {
+    const admin = currentRole === 'admin';
+
+    document.getElementById('usersBtn').style.display = admin ? 'block' : 'none';
+    document.querySelector('.fab').style.display = admin ? 'block' : 'none';
+
+    // Для viewer відкриття картки не повинно запускати редагування.
+    render();
+
+    if (admin) {
+      document.getElementById('userEmail').style.color = 'var(--accent)';
+    } else {
+      document.getElementById('userEmail').style.color = 'var(--muted)';
+    }
+  }
+
+  onAuthStateChanged(auth, async user => {
+    const loginScreen = document.getElementById('loginScreen');
+    const appContent = document.getElementById('appContent');
+
+    if (!user) {
+      currentUser = null;
+      currentRole = null;
+      databaseStarted = false;
+      loginScreen.style.display = 'flex';
+      appContent.style.display = 'none';
+      return;
+    }
+
+    try {
+      currentUser = user;
+      document.getElementById('userEmail').textContent = user.email || '';
+
+      const role = await loadUserRole(user);
+
+      if (role !== 'admin' && role !== 'viewer') {
+        await signOut(auth);
+        document.getElementById('loginError').textContent = 'Цьому користувачу ще не надано доступ до Jelly Lab';
+        return;
+      }
+
+      currentRole = role;
+      loginScreen.style.display = 'none';
+      appContent.style.display = 'block';
+      applyPermissions();
+
+      if (!databaseStarted) {
+        databaseStarted = true;
+        startDatabase();
+      }
+    } catch (error) {
+      console.error(error);
+      await signOut(auth);
+      document.getElementById('loginError').textContent = 'Не вдалося перевірити права користувача';
+    }
+  });
+
+  window.openUsers = async () => {
+    if (currentRole !== 'admin') return;
+    document.getElementById('viewerUid').value = '';
+    document.getElementById('usersModal').classList.add('open');
+    await renderUsersList();
+  };
+
+  window.closeUsers = () => {
+    document.getElementById('usersModal').classList.remove('open');
+  };
+
+  window.addViewer = async () => {
+    if (currentRole !== 'admin') return;
+
+    const uid = document.getElementById('viewerUid').value.trim();
+
+    if (!uid) {
+      alert('Вставте UID користувача');
+      return;
+    }
+
+    if (uid === ADMIN_UID) {
+      alert('Цей UID уже є адміністратором');
+      return;
+    }
+
+    try {
+      await set(ref(db, `users/${uid}/role`), 'viewer');
+      document.getElementById('viewerUid').value = '';
+      await renderUsersList();
+      alert('Користувача додано як переглядача');
+    } catch (error) {
+      console.error(error);
+      alert('Не вдалося додати користувача');
+    }
+  };
+
+  async function renderUsersList() {
+    const list = document.getElementById('usersList');
+
+    try {
+      const snap = await get(ref(db, 'users'));
+      const users = snap.val() || {};
+
+      const entries = Object.entries(users).filter(([uid]) => uid !== ADMIN_UID);
+
+      if (!entries.length) {
+        list.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;">Переглядачів ще немає</div>';
+        return;
+      }
+
+      list.innerHTML = entries.map(([uid, data]) => `
+        <div class="manage-list-item">
+          <div style="min-width:0;">
+            <div style="font-size:11px;font-weight:700;">${data.role === 'viewer' ? '👤 Переглядач' : data.role}</div>
+            <div style="font-size:8px;color:var(--muted);word-break:break-all;">${uid}</div>
+          </div>
+          <span onclick="removeViewer('${uid}')" style="cursor:pointer;">🗑</span>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error(error);
+      list.innerHTML = '<div style="color:var(--danger);font-size:11px;">Не вдалося завантажити користувачів</div>';
+    }
+  }
+
+  window.removeViewer = async (uid) => {
+    if (currentRole !== 'admin') return;
+    if (!confirm('Забрати доступ у цього користувача?')) return;
+
+    try {
+      await remove(ref(db, `users/${uid}`));
+      await renderUsersList();
+    } catch (error) {
+      console.error(error);
+      alert('Не вдалося забрати доступ');
+    }
+  };
 
   // activeCats тепер Set — підтримує мультивибір
   let flavors = [], cats = {}, brands = [], activeCats = new Set(), activeVol = null, editId = null, base64Img = "";
@@ -246,20 +403,23 @@ onAuthStateChanged(auth, user => {
   const volumes = ["10мл", "15мл", "30мл"];
 
   function startDatabase() {
-  onValue(ref(db, '/'), s => {
-    const d = s.val() || {};
+    onValue(ref(db, 'flavors'), s => {
+      const d = s.val() || {};
+      flavors = Object.entries(d).map(([id,v]) => ({id,...v}));
+      render();
+    });
 
-    flavors = d.flavors
-      ? Object.entries(d.flavors).map(([id,v]) => ({id,...v}))
-      : [];
+    onValue(ref(db, 'categories'), s => {
+      cats = s.val() || {'інше':'✨'};
+      renderFilters();
+      render();
+    });
 
-    cats = d.categories || {'інше':'✨'};
-    brands = (d.brands || []).sort();
-
-    render();
-    renderFilters();
-  });
-}
+    onValue(ref(db, 'brands'), s => {
+      brands = Array.isArray(s.val()) ? s.val().sort() : [];
+      renderFilters();
+    });
+  }
 
   // мультивибір: тап додає або знімає категорію
   window.toggleCat = (c) => {
@@ -308,7 +468,7 @@ onAuthStateChanged(auth, user => {
     document.getElementById('results').innerHTML = fArr.map(f => `
       <div class="card">
         <div class="card-img" onclick="if('${f.img}') zoom('${f.img}')">${f.img ? `<img src="${f.img}">` : '🪼'}</div>
-        <div class="card-info" onclick="openEdit('${f.id}')">
+        <div class="card-info" ${currentRole === 'admin' ? `onclick="openEdit('${f.id}')"` : ''}>
           <div class="card-brand">${f.brand || ''}</div>
           <div class="card-name">${f.name}</div>
           <div class="badge-row">
@@ -316,7 +476,7 @@ onAuthStateChanged(auth, user => {
             ${(f.cats||[]).map(c => `<span class="badge">${cats[c]||'✨'} ${c}</span>`).join('')}
           </div>
         </div>
-        <span style="opacity:0.2; padding:10px; cursor:pointer;" onclick="delFlavor('${f.id}')">🗑</span>
+        ${currentRole === 'admin' ? `<span style="opacity:0.2; padding:10px; cursor:pointer;" onclick="delFlavor('${f.id}')">🗑</span>` : ''}
       </div>`).join('');
   };
 
@@ -336,6 +496,7 @@ onAuthStateChanged(auth, user => {
   window.renderModalVol = () => { document.getElementById('modalVol').innerHTML = volumes.map(v => `<div class="tag ${window.selectedVol===v?'active':''}" onclick="setModalVol('${v}')">${v}</div>`).join(''); };
 
   window.openAdd = () => {
+    if (currentRole !== 'admin') return;
     editId = null; base64Img = ""; window.selectedVol = "30мл"; window.selectedCats = new Set(['інше']);
     document.getElementById('inName').value = "";
     document.getElementById('preview').style.display = 'none';
@@ -346,6 +507,7 @@ onAuthStateChanged(auth, user => {
   };
 
   window.openEdit = (id) => {
+    if (currentRole !== 'admin') return;
     const f = flavors.find(x => x.id === id);
     editId = id; base64Img = f.img || ""; window.selectedVol = f.vol || "30мл";
     window.selectedCats = new Set(f.cats || []);
@@ -358,6 +520,7 @@ onAuthStateChanged(auth, user => {
   };
 
   window.save = async () => {
+    if (currentRole !== 'admin') return;
     const n = document.getElementById('inName').value.trim();
     const b = document.getElementById('inBrand').value;
     if(!n || !b) return alert("Заповніть назву та бренд!");
@@ -368,6 +531,7 @@ onAuthStateChanged(auth, user => {
   };
 
   window.openManage = (t) => {
+    if (currentRole !== 'admin') return;
     const m = document.getElementById('manageModal'); m.classList.add('open');
     const c = document.getElementById('manageContent');
     if(t==='brands') {
@@ -379,10 +543,10 @@ onAuthStateChanged(auth, user => {
     }
   };
 
-  window.addB = () => { const n = prompt("Бренд:"); if(n) set(ref(db, 'brands'), [...brands, n]); openManage('brands'); };
-  window.delB = (n) => { if(confirm("Видалити?")) set(ref(db, 'brands'), brands.filter(x=>x!==n)); openManage('brands'); };
-  window.addC = () => { const n = prompt("Назва:"), e = prompt("Емодзі:","✨"); if(n) update(ref(db,'categories'),{[n]:e}); openManage('cats'); };
-  window.delC = (n) => { if(confirm("Видалити?")) remove(ref(db,`categories/${n}`)); openManage('cats'); };
+  window.addB = () => { if (currentRole !== 'admin') return; const n = prompt("Бренд:"); if(n) set(ref(db, 'brands'), [...brands, n]); openManage('brands'); };
+  window.delB = (n) => { if (currentRole !== 'admin') return; if(confirm("Видалити?")) set(ref(db, 'brands'), brands.filter(x=>x!==n)); openManage('brands'); };
+  window.addC = () => { if (currentRole !== 'admin') return; const n = prompt("Назва:"), e = prompt("Емодзі:","✨"); if(n) update(ref(db,'categories'),{[n]:e}); openManage('cats'); };
+  window.delC = (n) => { if (currentRole !== 'admin') return; if(confirm("Видалити?")) remove(ref(db,`categories/${n}`)); openManage('cats'); };
 
   window.handleFile = (el) => {
     const f = el.files[0]; if(!f) return;
@@ -396,7 +560,7 @@ onAuthStateChanged(auth, user => {
     };
   };
 
-  window.delFlavor = (id) => { if(confirm("Видалити?")) remove(ref(db, `flavors/${id}`)); };
+  window.delFlavor = (id) => { if (currentRole !== 'admin') return; if(confirm("Видалити?")) remove(ref(db, `flavors/${id}`)); };
   window.closeAdd = () => document.getElementById('modal').classList.remove('open');
 </script>
 </body>
